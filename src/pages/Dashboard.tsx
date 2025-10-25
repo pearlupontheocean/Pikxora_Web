@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getCurrentUser, supabase } from "@/lib/supabase";
+import { getUserPrimaryRole } from "@/lib/roles";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import RatingStars from "@/components/RatingStars";
 const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [walls, setWalls] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -36,6 +38,10 @@ const Dashboard = () => {
       .single();
 
     setProfile(profileData);
+
+    // Load user role
+    const role = await getUserPrimaryRole(session.user.id);
+    setUserRole(role);
 
     // Load walls
     const { data: wallsData } = await supabase
@@ -76,7 +82,7 @@ const Dashboard = () => {
                 Welcome, {profile?.name}
               </h1>
               <p className="text-muted-foreground">
-                Role: <span className="text-primary capitalize">{profile?.role}</span>
+                Role: <span className="text-primary capitalize">{userRole}</span>
               </p>
               {profile?.rating && (
                 <div className="mt-2">
@@ -91,7 +97,7 @@ const Dashboard = () => {
           </div>
 
           {/* Verification Status */}
-          {profile?.role === "studio" && (isPending || isRejected) && (
+          {userRole === "studio" && (isPending || isRejected) && (
             <Card className={`p-6 border-2 ${isRejected ? 'border-destructive' : 'border-yellow-500'}`}>
               <h3 className="font-semibold text-lg mb-2">
                 {isPending ? "Verification Pending" : "Verification Rejected"}
@@ -108,7 +114,7 @@ const Dashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Your Walls</h2>
-              {profile?.role !== "investor" && profile?.verification_status === "approved" && (
+              {userRole !== "investor" && profile?.verification_status === "approved" && (
                 <Button onClick={() => navigate("/wall/create")}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Wall
@@ -121,7 +127,7 @@ const Dashboard = () => {
                 <p className="text-muted-foreground mb-4">
                   You haven't created any walls yet
                 </p>
-                {profile?.verification_status === "approved" && profile?.role !== "investor" && (
+                {profile?.verification_status === "approved" && userRole !== "investor" && (
                   <Button onClick={() => navigate("/wall/create")}>
                     Create Your First Wall
                   </Button>
@@ -157,7 +163,7 @@ const Dashboard = () => {
           </div>
 
           {/* Admin Section */}
-          {profile?.role === "admin" && (
+          {userRole === "admin" && (
             <div>
               <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
               <Button onClick={() => navigate("/admin/verifications")}>

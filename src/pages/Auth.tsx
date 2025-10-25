@@ -53,7 +53,7 @@ const Auth = () => {
         // Validate signup data
         const validatedData = signupSchema.parse({ email, password, name, role });
         
-        const { data, error } = await signUp(
+        const { data, error, role: userRole } = await signUp(
           validatedData.email,
           validatedData.password,
           validatedData.name,
@@ -74,12 +74,24 @@ const Auth = () => {
               id: data.user.id,
               email: validatedData.email,
               name: validatedData.name,
-              role: validatedData.role,
-              verification_status: validatedData.role === "studio" ? "pending" : "approved",
+              verification_status: userRole === "studio" ? "pending" : "approved",
             });
 
           if (profileError) {
             toast.error("Error creating profile");
+            return;
+          }
+
+          // Create user role
+          const { error: roleError } = await supabase
+            .from("user_roles")
+            .insert({
+              user_id: data.user.id,
+              role: userRole as any,
+            });
+
+          if (roleError) {
+            toast.error("Error setting user role");
           } else {
             toast.success("Account created! Welcome to PIKXORA");
             navigate("/dashboard");

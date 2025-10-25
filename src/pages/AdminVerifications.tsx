@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import { hasRole } from "@/lib/roles";
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,17 +39,22 @@ const AdminVerifications = () => {
 
     setProfile(profileData);
 
-    if (profileData?.role !== "admin") {
+    // Check if user is admin
+    const isAdmin = await hasRole(session.user.id, 'admin');
+    if (!isAdmin) {
       navigate("/dashboard");
       return;
     }
 
-    // Load pending users
+    // Load pending studio users by joining with user_roles
     const { data: pendingData } = await supabase
       .from("profiles")
-      .select("*")
+      .select(`
+        *,
+        user_roles!inner(role)
+      `)
       .eq("verification_status", "pending")
-      .eq("role", "studio")
+      .eq("user_roles.role", "studio")
       .order("created_at", { ascending: true });
 
     setPendingUsers(pendingData || []);

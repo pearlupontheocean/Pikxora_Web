@@ -13,12 +13,11 @@ export const signUp = async (email: string, password: string, name: string, role
       emailRedirectTo: redirectUrl,
       data: {
         name,
-        role,
       }
     }
   });
   
-  return { data, error };
+  return { data, error, role };
 };
 
 export const signIn = async (email: string, password: string) => {
