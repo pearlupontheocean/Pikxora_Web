@@ -1,8 +1,12 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Globe, Star, Users, Zap } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { ArrowRight, Globe, Star, Users, Zap, TrendingUp } from "lucide-react";
 import heroImage from "@/assets/hero-vfx.jpg";
+import showcase1 from "@/assets/showcase-1.jpg";
+import showcase2 from "@/assets/showcase-2.jpg";
+import showcase3 from "@/assets/showcase-3.jpg";
 
 const Index = () => {
   return (
@@ -146,8 +150,87 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Showcase Section */}
       <section className="py-24 px-4 bg-gradient-to-b from-background to-darker-grey">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-bold red-glow mb-4">
+              World-Class VFX Work
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Explore stunning portfolios from top studios around the globe
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { image: showcase1, title: "Cinematic VFX", category: "Visual Effects" },
+              { image: showcase2, title: "Character Animation", category: "3D Animation" },
+              { image: showcase3, title: "Motion Graphics", category: "Compositing" }
+            ].map((showcase, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className="hover-lift"
+              >
+                <Card className="overflow-hidden border-red-glow cursor-pointer">
+                  <div className="relative aspect-video">
+                    <img
+                      src={showcase.image}
+                      alt={showcase.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6">
+                      <p className="text-xs text-primary mb-1">{showcase.category}</p>
+                      <h3 className="text-xl font-bold">{showcase.title}</h3>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-24 px-4">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-4 gap-8">
+            {[
+              { value: "1000+", label: "Global Studios", icon: Globe },
+              { value: "5000+", label: "Artists", icon: Users },
+              { value: "50+", label: "Countries", icon: TrendingUp },
+              { value: "10000+", label: "Projects", icon: Star }
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <stat.icon className="h-10 w-10 text-primary mx-auto mb-4 drop-shadow-[0_0_10px_hsl(var(--red-glow))]" />
+                <h3 className="text-4xl font-bold red-glow mb-2">{stat.value}</h3>
+                <p className="text-muted-foreground">{stat.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-4 bg-gradient-to-b from-background to-black">
         <div className="container mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
