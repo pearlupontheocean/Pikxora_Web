@@ -60,13 +60,18 @@ export type Database = {
         Row: {
           associations: string[] | null
           avatar_url: string | null
+          awards: string[] | null
           bio: string | null
+          brand_colors: Json | null
           created_at: string | null
           email: string
           id: string
           location: string | null
+          logo_url: string | null
           name: string
           rating: number | null
+          social_links: Json | null
+          tagline: string | null
           updated_at: string | null
           verification_status:
             | Database["public"]["Enums"]["verification_status"]
@@ -75,13 +80,18 @@ export type Database = {
         Insert: {
           associations?: string[] | null
           avatar_url?: string | null
+          awards?: string[] | null
           bio?: string | null
+          brand_colors?: Json | null
           created_at?: string | null
           email: string
           id: string
           location?: string | null
+          logo_url?: string | null
           name: string
           rating?: number | null
+          social_links?: Json | null
+          tagline?: string | null
           updated_at?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -90,13 +100,18 @@ export type Database = {
         Update: {
           associations?: string[] | null
           avatar_url?: string | null
+          awards?: string[] | null
           bio?: string | null
+          brand_colors?: Json | null
           created_at?: string | null
           email?: string
           id?: string
           location?: string | null
+          logo_url?: string | null
           name?: string
           rating?: number | null
+          social_links?: Json | null
+          tagline?: string | null
           updated_at?: string | null
           verification_status?:
             | Database["public"]["Enums"]["verification_status"]
@@ -113,6 +128,8 @@ export type Database = {
           media_type: string | null
           media_url: string | null
           order_index: number | null
+          showreel_type: string | null
+          showreel_url: string | null
           title: string
           wall_id: string
         }
@@ -124,6 +141,8 @@ export type Database = {
           media_type?: string | null
           media_url?: string | null
           order_index?: number | null
+          showreel_type?: string | null
+          showreel_url?: string | null
           title: string
           wall_id: string
         }
@@ -135,6 +154,8 @@ export type Database = {
           media_type?: string | null
           media_url?: string | null
           order_index?: number | null
+          showreel_type?: string | null
+          showreel_url?: string | null
           title?: string
           wall_id?: string
         }
@@ -210,36 +231,60 @@ export type Database = {
       }
       walls: {
         Row: {
+          awards: string[] | null
+          brand_colors: Json | null
           created_at: string | null
           description: string | null
           hero_media_type: string | null
           hero_media_url: string | null
           id: string
+          journey_content: string | null
+          logo_url: string | null
           published: boolean | null
+          showreel_type: string | null
+          showreel_url: string | null
+          social_links: Json | null
+          tagline: string | null
           title: string
           updated_at: string | null
           user_id: string
           view_count: number | null
         }
         Insert: {
+          awards?: string[] | null
+          brand_colors?: Json | null
           created_at?: string | null
           description?: string | null
           hero_media_type?: string | null
           hero_media_url?: string | null
           id?: string
+          journey_content?: string | null
+          logo_url?: string | null
           published?: boolean | null
+          showreel_type?: string | null
+          showreel_url?: string | null
+          social_links?: Json | null
+          tagline?: string | null
           title: string
           updated_at?: string | null
           user_id: string
           view_count?: number | null
         }
         Update: {
+          awards?: string[] | null
+          brand_colors?: Json | null
           created_at?: string | null
           description?: string | null
           hero_media_type?: string | null
           hero_media_url?: string | null
           id?: string
+          journey_content?: string | null
+          logo_url?: string | null
           published?: boolean | null
+          showreel_type?: string | null
+          showreel_url?: string | null
+          social_links?: Json | null
+          tagline?: string | null
           title?: string
           updated_at?: string | null
           user_id?: string

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
-import { LogOut, User, LayoutGrid } from "lucide-react";
+import { LogOut, User, LayoutGrid, LogIn, UserPlus } from "lucide-react";
 import { signOut } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -62,10 +62,22 @@ const Navbar = ({ user, profile }: NavbarProps) => {
           ) : (
             <>
               <Link to="/browse">
-                <Button variant="ghost" size="sm">Browse</Button>
+                <Button variant="ghost" size="sm">
+                  <LayoutGrid className="h-4 w-4 mr-2" />
+                  Browse
+                </Button>
               </Link>
               <Link to="/auth">
-                <Button variant="default" size="sm">Sign In</Button>
+                <Button variant="outline" size="sm" className="hover:bg-primary/10">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button size="sm" className="bg-primary hover:bg-primary/90">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Sign Up
+                </Button>
               </Link>
             </>
           )}

@@ -8,6 +8,8 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Browse from "./pages/Browse";
 import WallView from "./pages/WallView";
+import WallCreate from "./pages/WallCreate";
+import WallEdit from "./pages/WallEdit";
 import AdminVerifications from "./pages/AdminVerifications";
 import NotFound from "./pages/NotFound";
 
@@ -24,7 +26,9 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/browse" element={<Browse />} />
+          <Route path="/wall/create" element={<WallCreate />} />
           <Route path="/wall/:id" element={<WallView />} />
+          <Route path="/wall/:id/edit" element={<WallEdit />} />
           <Route path="/admin/verifications" element={<AdminVerifications />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
