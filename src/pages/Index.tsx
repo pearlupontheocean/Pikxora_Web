@@ -26,7 +26,7 @@ import eventFuture from "@/assets/event-future.jpg";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {/* Hero Section - Full Immersive */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -35,40 +35,40 @@ const Index = () => {
             alt="Holographic globe with India glowing at center"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 text-center">
+        <div className="relative z-10 container mx-auto px-6 lg:px-8 text-center max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-8"
+            className="space-y-10"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full mb-4"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 border border-primary/30 rounded-full backdrop-blur-sm"
             >
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="text-sm text-primary">Crafted in India • Powering Global Dreams</span>
+              <span className="text-sm font-medium text-foreground">Crafted in India • Powering Global Dreams</span>
             </motion.div>
 
             <motion.h1
-              className="text-5xl md:text-7xl lg:text-8xl font-bold"
+              className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight"
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <span className="red-glow-intense block mb-2">PIKXORA</span>
-              <span className="text-3xl md:text-4xl lg:text-5xl font-normal text-foreground block">
+              <span className="red-glow-intense block mb-4">PIKXORA</span>
+              <span className="text-3xl md:text-4xl lg:text-5xl font-normal text-foreground/90 block leading-relaxed">
                 Where Indian Pixels Power Global Dreams
               </span>
             </motion.h1>
 
             <motion.p
-              className="text-xl md:text-2xl text-muted-foreground max-w-4xl mx-auto"
+              className="text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
@@ -78,20 +78,20 @@ const Index = () => {
             </motion.p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              className="flex flex-col sm:flex-row gap-6 justify-center items-center pt-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7 }}
             >
               <Link to="/auth">
-                <Button size="lg" className="text-lg px-8 py-6 border-red-glow-intense group">
+                <Button size="lg" className="text-base px-10 py-7 rounded-lg group shadow-lg hover:shadow-xl transition-all">
                   <Rocket className="mr-2 h-5 w-5 group-hover:animate-pulse" />
                   Launch Your Studio Profile
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/auth">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-primary/50 hover:bg-primary/10">
+                <Button size="lg" variant="outline" className="text-base px-10 py-7 rounded-lg border-primary/40 hover:bg-primary/10 hover:border-primary/60 transition-all">
                   <Sparkles className="mr-2 h-5 w-5" />
                   Ignite Your Artist Journey
                 </Button>
@@ -101,36 +101,36 @@ const Index = () => {
         </div>
 
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 hidden md:block"
           animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          <div className="w-6 h-10 border-2 border-primary rounded-full flex justify-center">
+          <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex justify-center backdrop-blur-sm">
             <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse" />
           </div>
         </motion.div>
       </section>
 
       {/* Empowerment Spotlight Section */}
-      <section className="py-24 px-4 bg-gradient-to-b from-black to-darker-grey">
-        <div className="container mx-auto">
+      <section className="py-28 px-6 lg:px-8 bg-gradient-to-b from-background via-card to-background">
+        <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold red-glow mb-6">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold red-glow mb-8 leading-tight">
               The Neural Hub for VFX Growth
             </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-12">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
               Pikxora isn't just a platform—it's a living ecosystem where studios showcase cutting-edge reels, 
               artists build portfolios with AI-enhanced tools, and the community drives welfare through mentorship, 
               fair-pay advocacy, and skill-upgrading grants.
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 mb-16">
             {[
               {
                 icon: TrendingUp,
@@ -159,18 +159,20 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-6 border border-primary/30 rounded-lg hover-lift bg-background/50 backdrop-blur-sm"
+                className="group"
               >
-                <feature.icon className="h-12 w-12 text-primary mb-4 drop-shadow-[0_0_10px_hsl(var(--primary))]" />
-                <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                <Card className="p-8 h-full border border-primary/20 hover:border-primary/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-2">
+                  <feature.icon className="h-14 w-14 text-primary mb-6 drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)] group-hover:scale-110 transition-transform duration-300" />
+                  <h3 className="text-xl font-bold mb-4 text-foreground">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{feature.description}</p>
+                </Card>
               </motion.div>
             ))}
           </div>
 
-          <div className="text-center">
+          <div className="text-center pt-8">
             <Link to="/browse">
-              <Button size="lg" variant="outline" className="border-primary/50 hover:bg-primary/10">
+              <Button size="lg" variant="outline" className="border-primary/40 hover:bg-primary/10 hover:border-primary/60 px-8 py-6 text-base rounded-lg transition-all">
                 <Target className="mr-2 h-5 w-5" />
                 Discover Your Power
               </Button>
@@ -180,24 +182,24 @@ const Index = () => {
       </section>
 
       {/* Showcase Studios & Talent */}
-      <section className="py-24 px-4 bg-gradient-to-b from-darker-grey to-black">
-        <div className="container mx-auto">
+      <section className="py-28 px-6 lg:px-8 bg-gradient-to-b from-background to-card">
+        <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold red-glow mb-4">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold red-glow mb-6 leading-tight">
               Global Studios • Infinite Talent
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
               Connecting visionaries across continents
             </p>
           </motion.div>
 
           {/* Studio Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
             {[
               {
                 name: "PixelForge India",
@@ -227,36 +229,35 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.03 }}
-                className="hover-lift"
+                className="group"
               >
-                <Card className="overflow-hidden border-red-glow cursor-pointer group">
-                  <div className="relative aspect-video">
+                <Card className="overflow-hidden border border-primary/30 hover:border-primary/60 cursor-pointer transition-all duration-300 hover:-translate-y-2 h-full">
+                  <div className="relative aspect-video overflow-hidden">
                     <img
                       src={studio.image}
                       alt={studio.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
                     <div className="absolute top-4 right-4">
-                      <div className="flex items-center gap-1 bg-primary/20 backdrop-blur-sm px-3 py-1 rounded-full">
+                      <div className="flex items-center gap-1.5 bg-primary/20 backdrop-blur-md px-4 py-2 rounded-full border border-primary/30">
                         <Award className="h-4 w-4 text-primary" />
-                        <span className="text-xs font-semibold">Elite</span>
+                        <span className="text-xs font-semibold text-foreground">Elite</span>
                       </div>
                     </div>
                   </div>
-                  <div className="p-6 space-y-3">
+                  <div className="p-8 space-y-4">
                     <h3 className="text-2xl font-bold red-glow">{studio.name}</h3>
-                    <p className="text-sm text-primary italic">{studio.tagline}</p>
+                    <p className="text-sm text-primary italic font-medium">{studio.tagline}</p>
                     <p className="text-sm text-muted-foreground flex items-center gap-2">
-                      <Globe className="h-4 w-4" />
+                      <Globe className="h-4 w-4 text-primary" />
                       {studio.location}
                     </p>
-                    <p className="text-sm text-foreground">{studio.specialty}</p>
+                    <p className="text-sm text-foreground/80 leading-relaxed">{studio.specialty}</p>
                     <Link to="/browse">
-                      <Button className="w-full mt-4 group">
+                      <Button className="w-full mt-4 group/btn">
                         Connect Now
-                        <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="ml-2 h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
                       </Button>
                     </Link>
                   </div>
@@ -272,10 +273,11 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center mb-12"
           >
-            <h3 className="text-3xl font-bold mb-8">Rising Stars</h3>
+            <h3 className="text-3xl md:text-4xl font-bold mb-4">Rising Stars</h3>
+            <p className="text-muted-foreground text-base">Meet the next generation of VFX pioneers</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mt-12">
             {[
               {
                 name: "Aisha Rao",
@@ -299,22 +301,27 @@ const Index = () => {
             ].map((artist, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
+                className="group"
               >
-                <Card className="p-6 border-primary/30 hover:border-primary/60 transition-colors">
+                <Card className="p-8 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 h-full bg-card/50 backdrop-blur-sm">
                   {artist.image && (
-                    <div className="relative w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-2 border-primary/50">
-                      <img src={artist.image} alt={artist.name} className="w-full h-full object-cover" />
+                    <div className="relative w-28 h-28 mx-auto mb-6 rounded-full overflow-hidden border-2 border-primary/40 group-hover:border-primary/70 transition-colors ring-4 ring-primary/10">
+                      <img src={artist.image} alt={artist.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                   )}
-                  <h4 className="font-bold text-lg mb-1">{artist.name}</h4>
-                  <p className="text-primary text-sm mb-2">{artist.role}</p>
-                  <p className="text-xs text-muted-foreground mb-3">{artist.location}</p>
-                  <p className="text-sm italic">{artist.specialty}</p>
+                  <div className="text-center space-y-3">
+                    <h4 className="font-bold text-xl text-foreground">{artist.name}</h4>
+                    <p className="text-primary text-sm font-medium">{artist.role}</p>
+                    <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                      <Globe className="h-3 w-3" />
+                      {artist.location}
+                    </p>
+                    <p className="text-sm italic text-foreground/70 leading-relaxed pt-2">{artist.specialty}</p>
+                  </div>
                 </Card>
               </motion.div>
             ))}
@@ -323,23 +330,23 @@ const Index = () => {
       </section>
 
       {/* Upcoming Events */}
-      <section className="py-24 px-4 bg-gradient-to-b from-black to-darker-grey">
-        <div className="container mx-auto">
+      <section className="py-28 px-6 lg:px-8 bg-gradient-to-b from-card to-background">
+        <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold red-glow mb-4">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold red-glow mb-8 leading-tight">
               Upcoming Events • Hype Timeline
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
               Network with visionaries, demo bleeding-edge tech, and co-create the industry's tomorrow
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {[
               {
                 name: "VFX Summit 2026: Bangalore",
@@ -366,17 +373,17 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.02 }}
+                className="group"
               >
-                <Card className="p-6 border-primary/30 hover:border-primary transition-colors h-full">
-                  <div className="flex items-center gap-2 mb-4">
+                <Card className="p-8 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 h-full bg-card/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-6">
                     <Calendar className="h-5 w-5 text-primary" />
-                    <span className="text-xs text-primary font-semibold uppercase">{event.type}</span>
+                    <span className="text-xs text-primary font-semibold uppercase tracking-wider">{event.type}</span>
                   </div>
-                  <h3 className="text-xl font-bold mb-2">{event.name}</h3>
-                  <p className="text-sm text-primary italic mb-3">{event.tagline}</p>
-                  <p className="text-sm text-muted-foreground mb-4">{event.dates}</p>
-                  <Button variant="outline" size="sm" className="w-full border-primary/50">
+                  <h3 className="text-xl md:text-2xl font-bold mb-4 text-foreground leading-tight">{event.name}</h3>
+                  <p className="text-sm text-primary italic mb-4 font-medium">{event.tagline}</p>
+                  <p className="text-sm text-muted-foreground mb-6">{event.dates}</p>
+                  <Button variant="outline" size="sm" className="w-full border-primary/40 hover:bg-primary/10 hover:border-primary/60 transition-all">
                     <Rocket className="mr-2 h-4 w-4" />
                     Secure Your Spot
                   </Button>
@@ -388,23 +395,23 @@ const Index = () => {
       </section>
 
       {/* Latest Industry News */}
-      <section className="py-24 px-4 bg-gradient-to-b from-darker-grey to-black">
-        <div className="container mx-auto">
+      <section className="py-28 px-6 lg:px-8 bg-gradient-to-b from-background to-card">
+        <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold red-glow mb-4">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold red-glow mb-8 leading-tight">
               Latest Industry Pulse
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground leading-relaxed">
               Stay ahead of the VFX revolution
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="grid sm:grid-cols-2 gap-6 lg:gap-8 mb-12">
             {[
               {
                 headline: "Adobe's New AI Upscaler Shatters Render Times",
@@ -429,26 +436,26 @@ const Index = () => {
             ].map((news, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ x: 5 }}
+                className="group"
               >
-                <Card className="p-6 border-primary/20 hover:border-primary/50 transition-colors cursor-pointer h-full">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Newspaper className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-primary font-semibold uppercase">{news.category}</span>
+                <Card className="p-8 border border-primary/20 hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 h-full cursor-pointer bg-card/50 backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Newspaper className="h-5 w-5 text-primary" />
+                    <span className="text-xs text-primary font-semibold uppercase tracking-wider">{news.category}</span>
                   </div>
-                  <h3 className="font-bold text-lg mb-2">{news.headline}</h3>
-                  <p className="text-sm text-muted-foreground">{news.teaser}</p>
+                  <h3 className="font-bold text-xl mb-3 text-foreground group-hover:text-primary/90 transition-colors leading-tight">{news.headline}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{news.teaser}</p>
                 </Card>
               </motion.div>
             ))}
           </div>
 
-          <div className="text-center">
-            <Button variant="outline" size="lg" className="border-primary/50">
+          <div className="text-center pt-4">
+            <Button variant="outline" size="lg" className="border-primary/40 hover:bg-primary/10 hover:border-primary/60 px-8 py-6 text-base rounded-lg transition-all">
               <Newspaper className="mr-2 h-5 w-5" />
               Dive Deeper into News Hub
             </Button>
@@ -457,54 +464,61 @@ const Index = () => {
       </section>
 
       {/* AI Revolution Section */}
-      <section className="py-24 px-4 bg-gradient-to-b from-black to-darker-grey relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <section className="py-28 px-6 lg:px-8 bg-gradient-to-b from-card to-background relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
           <img src={aiNeural} alt="AI Neural Network" className="w-full h-full object-cover" />
         </div>
         
-        <div className="container mx-auto relative z-10">
+        <div className="container mx-auto relative z-10 max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <h2 className="text-4xl md:text-5xl font-bold red-glow-intense mb-6">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold red-glow-intense mb-8 leading-tight">
               AI: The Cosmic Catalyst Reshaping VFX
             </h2>
-            <p className="text-xl text-muted-foreground mb-4">
+            <p className="text-lg md:text-xl text-muted-foreground">
               Harness It with Pikxora
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="space-y-6"
+              className="space-y-8"
             >
-              <p className="text-lg leading-relaxed text-foreground/90">
+              <p className="text-base md:text-lg leading-relaxed text-foreground/90">
                 From generative neural networks birthing impossible worlds to predictive tools empowering solo artists, 
                 AI isn't replacing creators—<span className="text-primary font-semibold">it's amplifying Indian innovation on the global stage</span>.
               </p>
-              <p className="text-lg leading-relaxed text-foreground/90">
+              <p className="text-base md:text-lg leading-relaxed text-foreground/90">
                 At Pikxora, explore ethical AI integrations, case studies from Mumbai to Hollywood, and welfare safeguards 
                 against job displacement. Our platform champions responsible AI adoption that enhances human creativity rather than replacing it.
               </p>
-              <div className="space-y-3">
+              <div className="space-y-4 pt-4">
                 {[
                   "Real-Time Deepfakes & Virtual Humans (2025)",
                   "AI-Assisted Scene Composition (2026)",
                   "Sentient Simulation Environments (2030)"
                 ].map((item, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    <Brain className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <span className="text-sm text-muted-foreground">{item}</span>
-                  </div>
+                  <motion.div 
+                    key={index} 
+                    className="flex items-start gap-4 p-4 rounded-lg bg-card/30 border border-primary/10"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Brain className="h-6 w-6 text-primary mt-0.5 flex-shrink-0" />
+                    <span className="text-sm md:text-base text-foreground/80 leading-relaxed">{item}</span>
+                  </motion.div>
                 ))}
               </div>
-              <Button size="lg" className="mt-6">
+              <Button size="lg" className="mt-8 px-8 py-6 text-base rounded-lg">
                 <Sparkles className="mr-2 h-5 w-5" />
                 Explore AI Tools
               </Button>
@@ -514,15 +528,15 @@ const Index = () => {
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="relative"
+              className="relative lg:mt-0 mt-8"
             >
-              <div className="relative rounded-lg overflow-hidden border border-primary/30">
+              <div className="relative rounded-xl overflow-hidden border-2 border-primary/30 shadow-2xl">
                 <img
                   src={aiNeural}
                   alt="AI Neural Network Visualization"
                   className="w-full h-auto"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent" />
               </div>
             </motion.div>
           </div>
@@ -530,9 +544,9 @@ const Index = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 px-4 bg-black">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="py-24 px-6 lg:px-8 bg-background border-y border-primary/10">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {[
               { value: "10,000+", label: "Global Creators", icon: Users },
               { value: "50+", label: "Countries", icon: Globe },
@@ -545,11 +559,11 @@ const Index = () => {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="text-center"
+                className="text-center group"
               >
-                <stat.icon className="h-10 w-10 text-primary mx-auto mb-4 drop-shadow-[0_0_10px_hsl(var(--primary))]" />
-                <h3 className="text-4xl font-bold red-glow mb-2">{stat.value}</h3>
-                <p className="text-muted-foreground">{stat.label}</p>
+                <stat.icon className="h-12 w-12 text-primary mx-auto mb-6 drop-shadow-[0_0_15px_hsl(var(--primary)/0.5)] group-hover:scale-110 transition-transform duration-300" />
+                <h3 className="text-4xl md:text-5xl font-bold red-glow mb-3">{stat.value}</h3>
+                <p className="text-muted-foreground text-sm md:text-base">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -557,39 +571,39 @@ const Index = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-32 px-4 bg-gradient-to-b from-darker-grey via-black to-black relative overflow-hidden">
+      <section className="py-32 lg:py-40 px-6 lg:px-8 bg-gradient-to-b from-card via-background to-background relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={eventFuture} alt="Future Event" className="w-full h-full object-cover opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60" />
+          <img src={eventFuture} alt="Future Event" className="w-full h-full object-cover opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/70" />
         </div>
 
-        <div className="container mx-auto text-center relative z-10">
+        <div className="container mx-auto text-center relative z-10 max-w-6xl">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="space-y-8 max-w-4xl mx-auto"
+            className="space-y-10"
           >
-            <h2 className="text-5xl md:text-6xl font-bold red-glow-intense mb-6">
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-bold red-glow-intense mb-8 leading-tight">
               In Pikxora, Every Pixel Pulses with Purpose
             </h2>
-            <p className="text-2xl md:text-3xl font-light mb-8">
-              <span className="text-primary">Crafted in India</span> • <span className="text-foreground">Conquering the Cosmos</span>
+            <p className="text-xl md:text-2xl lg:text-3xl font-light mb-10 leading-relaxed">
+              <span className="text-primary font-semibold">Crafted in India</span> • <span className="text-foreground">Conquering the Cosmos</span>
             </p>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12">
+            <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto mb-16 leading-relaxed">
               Join the revolution where creativity meets technology, tradition embraces innovation, 
               and every artist finds their voice in the global VFX symphony.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link to="/auth">
-                <Button size="lg" className="text-lg px-10 py-7 border-red-glow-intense group">
+                <Button size="lg" className="text-base md:text-lg px-10 py-7 rounded-lg group shadow-xl hover:shadow-2xl transition-all">
                   <Rocket className="mr-2 h-6 w-6 group-hover:animate-pulse" />
                   Launch Your Journey
-                  <ArrowRight className="ml-2 h-6 w-6" />
+                  <ArrowRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link to="/browse">
-                <Button size="lg" variant="outline" className="text-lg px-10 py-7 border-primary/50">
+                <Button size="lg" variant="outline" className="text-base md:text-lg px-10 py-7 rounded-lg border-primary/40 hover:bg-primary/10 hover:border-primary/60 transition-all">
                   <Globe className="mr-2 h-6 w-6" />
                   Explore the Universe
                 </Button>
@@ -600,34 +614,34 @@ const Index = () => {
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 bg-black border-t border-primary/20">
-        <div className="container mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <h3 className="text-2xl font-bold red-glow mb-4">PIKXORA</h3>
-              <p className="text-sm text-muted-foreground">
+      <footer className="py-16 px-6 lg:px-8 bg-background border-t border-primary/20">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-12 mb-12">
+            <div className="space-y-4">
+              <h3 className="text-3xl font-bold red-glow mb-6">PIKXORA</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 The global community platform empowering VFX studios and artists worldwide. 
                 Proudly crafted in India.
               </p>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">Stay Synced to the Future</h4>
-              <div className="flex gap-4">
-                <Shield className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-                <Globe className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
-                <Users className="h-5 w-5 text-muted-foreground hover:text-primary cursor-pointer transition-colors" />
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg mb-6 text-foreground">Stay Synced to the Future</h4>
+              <div className="flex gap-6">
+                <Shield className="h-6 w-6 text-muted-foreground hover:text-primary cursor-pointer transition-all hover:scale-110" />
+                <Globe className="h-6 w-6 text-muted-foreground hover:text-primary cursor-pointer transition-all hover:scale-110" />
+                <Users className="h-6 w-6 text-muted-foreground hover:text-primary cursor-pointer transition-all hover:scale-110" />
               </div>
             </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <div className="space-y-2 text-sm text-muted-foreground">
+            <div className="space-y-4">
+              <h4 className="font-semibold text-lg mb-6 text-foreground">Legal</h4>
+              <div className="space-y-3 text-sm text-muted-foreground">
                 <p className="hover:text-primary cursor-pointer transition-colors">Privacy Policy</p>
                 <p className="hover:text-primary cursor-pointer transition-colors">Terms of Service</p>
                 <p className="hover:text-primary cursor-pointer transition-colors">Community Guidelines</p>
               </div>
             </div>
           </div>
-          <div className="text-center text-sm text-muted-foreground pt-8 border-t border-primary/10">
+          <div className="text-center text-sm text-muted-foreground pt-10 border-t border-primary/10">
             <p>© 2025 Pikxora. All rights reserved. Made with ❤️ in India for the World.</p>
           </div>
         </div>
