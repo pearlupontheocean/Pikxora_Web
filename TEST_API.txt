@@ -1,0 +1,118 @@
+═══════════════════════════════════════════════════════════
+   TEST YOUR API - cURL COMMANDS
+═══════════════════════════════════════════════════════════
+
+BASE URL: http://localhost:5001/api
+
+═══════════════════════════════════════════════════════════
+   1. SIGN UP (Create Account)
+═══════════════════════════════════════════════════════════
+
+curl -X POST http://localhost:5001/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@test.com",
+    "password": "test123",
+    "name": "Test User",
+    "role": "studio"
+  }'
+
+Response: {"user": {...}, "token": "eyJ..."}
+
+═══════════════════════════════════════════════════════════
+   2. SIGN IN (Login)
+═══════════════════════════════════════════════════════════
+
+curl -X POST http://localhost:5001/api/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@test.com",
+    "password": "test123"
+  }'
+
+Response: {"user": {...}, "token": "eyJ..."}
+
+SAVE THE TOKEN FROM RESPONSE!
+
+═══════════════════════════════════════════════════════════
+   3. GET CURRENT USER (Need Token)
+═══════════════════════════════════════════════════════════
+
+curl http://localhost:5001/api/auth/me \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+Replace YOUR_TOKEN_HERE with actual token
+
+═══════════════════════════════════════════════════════════
+   4. CREATE WALL (Need Token)
+═══════════════════════════════════════════════════════════
+
+curl -X POST http://localhost:5001/api/walls \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE" \
+  -d '{
+    "title": "My Portfolio Wall",
+    "description": "Showcasing my work",
+    "tagline": "Creating amazing VFX",
+    "published": true
+  }'
+
+═══════════════════════════════════════════════════════════
+   5. GET ALL WALLS (Public)
+═══════════════════════════════════════════════════════════
+
+curl http://localhost:5001/api/walls
+
+═══════════════════════════════════════════════════════════
+   6. GET MY WALLS (Need Token)
+═══════════════════════════════════════════════════════════
+
+curl http://localhost:5001/api/walls/my \
+  -H "Authorization: Bearer YOUR_TOKEN_HERE"
+
+═══════════════════════════════════════════════════════════
+   7. GET SPECIFIC WALL (Public)
+═══════════════════════════════════════════════════════════
+
+curl http://localhost:5001/api/walls/WALL_ID_HERE
+
+═══════════════════════════════════════════════════════════
+   ADMIN OPERATIONS
+═══════════════════════════════════════════════════════════
+
+Sign up as admin first (role: "admin"):
+
+curl -X POST http://localhost:5001/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@test.com",
+    "password": "admin123",
+    "name": "Admin User",
+    "role": "admin"
+  }'
+
+Then verify profiles:
+
+curl -X PUT http://localhost:5001/api/profiles/PROFILE_ID/verify \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -d '{
+    "verification_status": "approved",
+    "rating": 5
+  }'
+
+═══════════════════════════════════════════════════════════
+   SETUP
+═══════════════════════════════════════════════════════════
+
+1. Start MongoDB:
+   $ mongod
+
+2. Start Server:
+   $ cd server
+   $ npm run dev
+
+3. Test:
+   Copy any command above and run in terminal!
+
+═══════════════════════════════════════════════════════════

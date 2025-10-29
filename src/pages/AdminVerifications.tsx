@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase";
-import { hasRole } from "@/lib/roles";
+import { useCurrentUser, useMyProfile, usePendingProfiles, useVerifyProfile, useApprovedProfiles } from "@/lib/api-hooks";
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,71 +11,39 @@ import { Loader2, Check, X, MapPin, Link as LinkIcon } from "lucide-react";
 import RatingStars from "@/components/RatingStars";
 
 const AdminVerifications = () => {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [pendingUsers, setPendingUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedRatings, setSelectedRatings] = useState<Record<string, string>>({});
+  const [viewMode, setViewMode] = useState<"pending" | "approved">("pending");
   const navigate = useNavigate();
 
+  // React Query hooks
+  const { data: currentUserData } = useCurrentUser();
+  const { data: profile } = useMyProfile();
+  const { data: pendingUsers = [], isLoading: loadingPending, refetch } = usePendingProfiles();
+  const { data: approvedUsers = [], isLoading: loadingApproved } = useApprovedProfiles();
+  const verifyMutation = useVerifyProfile();
+
+  const user = currentUserData?.user;
+  const loading = loadingPending || loadingApproved;
+
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
+    const hasToken = !!localStorage.getItem('token');
+    if (hasToken && !loading && !currentUserData) {
       navigate("/auth");
-      return;
-    }
-
-    setUser(session.user);
-
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", session.user.id)
-      .single();
-
-    setProfile(profileData);
-
-    // Check if user is admin
-    const isAdmin = await hasRole(session.user.id, 'admin');
-    if (!isAdmin) {
+    } else if (!hasToken && !loading) {
+      navigate("/auth");
+    } else if (currentUserData && user && !user?.roles?.includes('admin')) {
       navigate("/dashboard");
-      return;
     }
-
-    // Load pending studio users by joining with user_roles
-    const { data: pendingData } = await supabase
-      .from("profiles")
-      .select(`
-        *,
-        user_roles!inner(role)
-      `)
-      .eq("verification_status", "pending")
-      .eq("user_roles.role", "studio")
-      .order("created_at", { ascending: true });
-
-    setPendingUsers(pendingData || []);
-    setLoading(false);
-  };
+  }, [currentUserData, user, loading, navigate]);
 
   const handleVerification = async (userId: string, status: "approved" | "rejected", rating?: number) => {
-    const updates: any = { verification_status: status };
-    if (status === "approved" && rating) {
-      updates.rating = rating;
-    }
-
-    const { error } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("id", userId);
-
-    if (error) {
-      toast.error("Error updating verification status");
-    } else {
-      toast.success(`Studio ${status}${rating ? ` with ${rating} star rating` : ""}`);
-      loadData();
+    try {
+      await verifyMutation.mutateAsync({ id: userId, verification_status: status, rating });
+      toast.success(`Profile ${status}${rating ? ` with ${rating} star rating` : ""}`);
+      refetch();
+    } catch (err: any) {
+      console.error("Error verifying profile:", err);
+      toast.error(err.message || "An error occurred");
     }
   };
 
@@ -99,24 +66,43 @@ const AdminVerifications = () => {
           className="space-y-8"
         >
           <div>
-            <h1 className="text-4xl font-bold red-glow-intense mb-2">
-              Pending Verifications
-            </h1>
-            <p className="text-muted-foreground">
-              Review and approve studio registrations
-            </p>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-4xl font-bold red-glow-intense mb-2">
+                  Studio Approvals
+                </h1>
+                <p className="text-muted-foreground">
+                  Review and manage studio registrations
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === "pending" ? "default" : "outline"}
+                  onClick={() => setViewMode("pending")}
+                >
+                  Pending ({pendingUsers.length})
+                </Button>
+                <Button
+                  variant={viewMode === "approved" ? "default" : "outline"}
+                  onClick={() => setViewMode("approved")}
+                >
+                  Approved ({approvedUsers.length})
+                </Button>
+              </div>
+            </div>
           </div>
 
-          {pendingUsers.length === 0 ? (
-            <Card className="p-12 text-center border-dashed">
-              <p className="text-muted-foreground">
-                No pending verifications at this time
-              </p>
-            </Card>
-          ) : (
-            <div className="space-y-6">
-              {pendingUsers.map((pendingUser) => (
-                <Card key={pendingUser.id} className="p-6 border-red-glow">
+          {viewMode === "pending" ? (
+            pendingUsers.length === 0 ? (
+              <Card className="p-12 text-center border-dashed">
+                <p className="text-muted-foreground">
+                  No pending verifications at this time
+                </p>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                {pendingUsers.map((pendingUser) => (
+                <Card key={pendingUser._id} className="p-6 border-red-glow">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div>
@@ -152,7 +138,7 @@ const AdminVerifications = () => {
                       )}
 
                       <div className="text-sm text-muted-foreground">
-                        Registered: {new Date(pendingUser.created_at).toLocaleDateString()}
+                        Registered: {new Date(pendingUser.createdAt || pendingUser.created_at).toLocaleDateString()}
                       </div>
                     </div>
 
@@ -160,9 +146,12 @@ const AdminVerifications = () => {
                       <div>
                         <h4 className="font-semibold mb-2">Assign Rating</h4>
                         <Select
-                          onValueChange={(value) => {
+                          value={selectedRatings[pendingUser._id] || ""}
+                          onValueChange={async (value) => {
                             const rating = parseInt(value);
-                            handleVerification(pendingUser.id, "approved", rating);
+                            await handleVerification(pendingUser._id, "approved", rating);
+                            // Clear the selection after approval
+                            setSelectedRatings(prev => ({ ...prev, [pendingUser._id]: "" }));
                           }}
                         >
                           <SelectTrigger className="border-border">
@@ -206,7 +195,7 @@ const AdminVerifications = () => {
                       <Button
                         variant="destructive"
                         className="w-full"
-                        onClick={() => handleVerification(pendingUser.id, "rejected")}
+                        onClick={() => handleVerification(pendingUser._id, "rejected")}
                       >
                         <X className="h-4 w-4 mr-2" />
                         Reject Application
@@ -215,6 +204,84 @@ const AdminVerifications = () => {
                   </div>
                 </Card>
               ))}
+              </div>
+            )
+          ) : (
+            <div className="space-y-6">
+              {approvedUsers.length === 0 ? (
+                <Card className="p-12 text-center border-dashed">
+                  <p className="text-muted-foreground">
+                    No approved studios yet
+                  </p>
+                </Card>
+              ) : (
+                <>
+                  {approvedUsers.map((approvedUser: any) => (
+                    <Card key={approvedUser._id} className="p-6 border-green-500">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-2xl font-bold mb-1">{approvedUser.name}</h3>
+                              <p className="text-muted-foreground">{approvedUser.email}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
+                                Approved
+                              </span>
+                              {approvedUser.rating && (
+                                <RatingStars rating={approvedUser.rating} showBadge />
+                              )}
+                            </div>
+                          </div>
+
+                          {approvedUser.location && (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <MapPin className="h-4 w-4" />
+                              {approvedUser.location}
+                            </div>
+                          )}
+
+                          {approvedUser.bio && (
+                            <div>
+                              <h4 className="font-semibold mb-1">Bio</h4>
+                              <p className="text-sm text-muted-foreground">{approvedUser.bio}</p>
+                            </div>
+                          )}
+
+                          {approvedUser.associations && approvedUser.associations.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold mb-2">Associations</h4>
+                              <div className="flex flex-wrap gap-2">
+                                {approvedUser.associations.map((assoc: string, i: number) => (
+                                  <span key={i} className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
+                                    {assoc}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="text-sm text-muted-foreground">
+                            Approved: {approvedUser.updatedAt ? new Date(approvedUser.updatedAt).toLocaleDateString() : 'N/A'}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                            <p className="text-sm text-muted-foreground mb-2">
+                              Rating: {approvedUser.rating ? `${approvedUser.rating} stars` : 'Not rated'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Status: {approvedUser.verification_status}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </>
+              )}
             </div>
           )}
         </motion.div>

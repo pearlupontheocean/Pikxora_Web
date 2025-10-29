@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+import { useCurrentUser, useMyProfile, useWall as useWallHook } from "@/lib/api-hooks";
+import axiosInstance from "@/lib/axios";
 import Navbar from "@/components/Navbar";
 import VideoPlayer from "@/components/VideoPlayer";
 import StudioIdentity from "@/components/StudioIdentity";
@@ -13,89 +14,41 @@ import RatingStars from "@/components/RatingStars";
 
 const WallView = () => {
   const { id } = useParams();
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [wall, setWall] = useState<any>(null);
-  const [wallProfile, setWallProfile] = useState<any>(null);
-  const [projects, setProjects] = useState<any[]>([]);
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // React Query hooks
+  const { data: currentUserData } = useCurrentUser();
+  const { data: profile } = useMyProfile();
+  const { data: wall, isLoading: wallLoading } = useWallHook(id!);
+  
+  const user = currentUserData?.user;
+  const loading = wallLoading;
+
   useEffect(() => {
-    loadData();
+    if (!wall && !wallLoading) {
+      navigate("/browse");
+    }
+  }, [wall, wallLoading, navigate]);
+
+  // Load projects
+  const [projects, setProjects] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const response = await axiosInstance.get(`/projects/wall/${id}`);
+        setProjects(response.data || []);
+      } catch (error) {
+        console.error('Error loading projects:', error);
+      }
+    };
+    
+    if (id) {
+      loadProjects();
+    }
   }, [id]);
 
-  const loadData = async () => {
-    // Get current user (optional)
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      setUser(session.user);
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-      setProfile(profileData);
-    }
-
-    // Load wall
-    const { data: wallData, error: wallError } = await supabase
-      .from("walls")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (wallError || !wallData) {
-      navigate("/browse");
-      return;
-    }
-
-    setWall(wallData);
-
-    // Increment view count
-    await supabase
-      .from("walls")
-      .update({ view_count: (wallData.view_count || 0) + 1 })
-      .eq("id", id);
-
-    // Load wall owner profile
-    const { data: ownerData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", wallData.user_id)
-      .single();
-
-    setWallProfile(ownerData);
-
-    // Load projects
-    const { data: projectsData } = await supabase
-      .from("projects")
-      .select("*")
-      .eq("wall_id", id)
-      .order("order_index", { ascending: true });
-
-    setProjects(projectsData || []);
-
-    // Load team members
-    const { data: teamData } = await supabase
-      .from("team_members")
-      .select(`
-        *,
-        profiles:artist_id (
-          name,
-          avatar_url,
-          bio
-        )
-      `)
-      .eq("studio_wall_id", id);
-
-    setTeamMembers(teamData || []);
-
-    setLoading(false);
-  };
-
-  if (loading) {
+  if (loading || !wall) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -103,7 +56,8 @@ const WallView = () => {
     );
   }
 
-  const isOwner = user && wall && user.id === wall.user_id;
+  const wallOwner = wall.user_id;
+  const isOwner = user && wallOwner && (user.id === wallOwner._id || user.id === wallOwner.user_id);
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,18 +88,18 @@ const WallView = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
             <div>
               <h1 className="text-5xl font-bold red-glow-intense mb-2">{wall?.title}</h1>
-              {wallProfile && (
+              {wallOwner && (
                 <div className="flex items-center gap-4 text-muted-foreground">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">by {wallProfile.name}</span>
-                    {wallProfile.rating && (
-                      <RatingStars rating={wallProfile.rating} />
+                    <span className="text-lg">by {wallOwner.name}</span>
+                    {wallOwner.rating && (
+                      <RatingStars rating={wallOwner.rating} />
                     )}
                   </div>
-                  {wallProfile.location && (
+                  {wallOwner.location && (
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
-                      <span>{wallProfile.location}</span>
+                      <span>{wallOwner.location}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
@@ -164,7 +118,7 @@ const WallView = () => {
                   </Button>
                 </Link>
               )}
-              {wallProfile?.email && (
+              {wallOwner?.email && (
                 <Button>
                   <Mail className="h-4 w-4 mr-2" />
                   Get in Touch
@@ -194,10 +148,6 @@ const WallView = () => {
             <TabsTrigger value="journey" className="gap-2">
               <BookOpen className="h-4 w-4" />
               <span className="hidden sm:inline">Journey</span>
-            </TabsTrigger>
-            <TabsTrigger value="team" className="gap-2">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">Team</span>
             </TabsTrigger>
           </TabsList>
 
@@ -233,7 +183,7 @@ const WallView = () => {
               />
             </motion.div>
 
-            {wallProfile?.associations && wallProfile.associations.length > 0 && (
+            {wallOwner?.associations && wallOwner.associations.length > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -242,7 +192,7 @@ const WallView = () => {
               >
                 <h2 className="text-3xl font-bold">Associations</h2>
                 <div className="flex flex-wrap gap-2">
-                  {wallProfile.associations.map((assoc: string, index: number) => (
+                  {wallOwner.associations.map((assoc: string, index: number) => (
                     <span
                       key={index}
                       className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-full text-sm"
@@ -262,7 +212,7 @@ const WallView = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {projects.map((project, index) => (
                   <motion.div
-                    key={project.id}
+                    key={project._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -336,48 +286,6 @@ const WallView = () => {
               <p className="text-muted-foreground text-center py-12">
                 No journey content available yet
               </p>
-            )}
-          </TabsContent>
-
-          {/* Team Tab */}
-          <TabsContent value="team" className="space-y-6">
-            <h2 className="text-3xl font-bold">Core Team</h2>
-            {teamMembers.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teamMembers.map((member: any, index) => (
-                  <motion.div
-                    key={member.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card className="p-6 hover:shadow-xl transition-shadow">
-                      {member.profiles?.avatar_url && (
-                        <img
-                          src={member.profiles.avatar_url}
-                          alt={member.profiles.name}
-                          className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
-                        />
-                      )}
-                      <h3 className="text-xl font-bold text-center mb-2">
-                        {member.profiles?.name}
-                      </h3>
-                      {member.role && (
-                        <p className="text-sm text-primary text-center mb-3">
-                          {member.role}
-                        </p>
-                      )}
-                      {member.profiles?.bio && (
-                        <p className="text-sm text-muted-foreground text-center">
-                          {member.profiles.bio}
-                        </p>
-                      )}
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground text-center py-12">No team members yet</p>
             )}
           </TabsContent>
         </Tabs>

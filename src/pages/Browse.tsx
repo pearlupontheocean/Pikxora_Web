@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+import { useCurrentUser, useMyProfile, useWalls } from "@/lib/api-hooks";
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,49 +10,16 @@ import { Search, MapPin, Star, Loader2 } from "lucide-react";
 import RatingStars from "@/components/RatingStars";
 
 const Browse = () => {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [walls, setWalls] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // React Query hooks
+  const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
+  const { data: profile } = useMyProfile();
+  const { data: walls = [], isLoading: loading } = useWalls();
 
-  const loadData = async () => {
-    // Get current user (optional for browsing)
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      setUser(session.user);
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-      setProfile(profileData);
-    }
-
-    // Load published walls with profiles
-    const { data: wallsData } = await supabase
-      .from("walls")
-      .select(`
-        *,
-        profiles:user_id (
-          name,
-          role,
-          rating,
-          location,
-          associations
-        )
-      `)
-      .eq("published", true)
-      .order("created_at", { ascending: false });
-
-    setWalls(wallsData || []);
-    setLoading(false);
-  };
+  const user = currentUserData?.user;
+  const isLoading = loading || userLoading;
 
   const filteredWalls = walls.filter((wall) => {
     if (!searchTerm) return true;
@@ -60,18 +27,18 @@ const Browse = () => {
     return (
       wall.title?.toLowerCase().includes(term) ||
       wall.description?.toLowerCase().includes(term) ||
-      wall.profiles?.name?.toLowerCase().includes(term) ||
-      wall.profiles?.location?.toLowerCase().includes(term)
+      wall.user_id?.name?.toLowerCase().includes(term) ||
+      wall.user_id?.location?.toLowerCase().includes(term)
     );
   });
 
   const sortedWalls = [...filteredWalls].sort((a, b) => {
-    const ratingA = a.profiles?.rating || 0;
-    const ratingB = b.profiles?.rating || 0;
+    const ratingA = a.user_id?.rating || 0;
+    const ratingB = b.user_id?.rating || 0;
     return ratingB - ratingA;
   });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -135,10 +102,10 @@ const Browse = () => {
                   whileHover={{ scale: 1.02 }}
                   className="hover-lift"
                 >
-                  <Card
-                    className="overflow-hidden border-red-glow cursor-pointer h-full"
-                    onClick={() => navigate(`/wall/${wall.id}`)}
-                  >
+                      <Card
+                        className="overflow-hidden border-red-glow cursor-pointer h-full"
+                        onClick={() => navigate(`/wall/${wall._id}`)}
+                      >
                     {wall.hero_media_url && (
                       <div className="aspect-video bg-darker-grey relative overflow-hidden">
                         <img
@@ -153,38 +120,38 @@ const Browse = () => {
                     <div className="p-6 space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <h3 className="font-bold text-xl line-clamp-1">{wall.title}</h3>
-                        {wall.profiles?.rating && (
+                        {wall.user_id?.rating && (
                           <div className="flex-shrink-0">
-                            <RatingStars rating={wall.profiles.rating} />
+                            <RatingStars rating={wall.user_id.rating} />
                           </div>
                         )}
                       </div>
 
                       <p className="text-sm text-primary capitalize">
-                        {wall.profiles?.role || "User"}
+                        {wall.user_id?.name || "User"}
                       </p>
 
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {wall.description || "No description available"}
                       </p>
 
-                      {wall.profiles?.location && (
+                      {wall.user_id?.location && (
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
                           <MapPin className="h-4 w-4" />
-                          {wall.profiles.location}
+                          {wall.user_id.location}
                         </div>
                       )}
 
-                      {wall.profiles?.associations && wall.profiles.associations.length > 0 && (
+                      {wall.user_id?.associations && wall.user_id.associations.length > 0 && (
                         <div className="flex flex-wrap gap-1">
-                          {wall.profiles.associations.slice(0, 3).map((assoc: string, i: number) => (
+                          {wall.user_id.associations.slice(0, 3).map((assoc: string, i: number) => (
                             <span key={i} className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
                               {assoc}
                             </span>
                           ))}
-                          {wall.profiles.associations.length > 3 && (
+                          {wall.user_id.associations.length > 3 && (
                             <span className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded">
-                              +{wall.profiles.associations.length - 3}
+                              +{wall.user_id.associations.length - 3}
                             </span>
                           )}
                         </div>

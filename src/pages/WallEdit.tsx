@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser, useWall, useUpdateWall } from "@/lib/api-hooks";
 import { uploadFile } from "@/lib/upload";
 import { toast } from "sonner";
 import { Loader2, Plus, X } from "lucide-react";
@@ -32,8 +32,6 @@ type WallFormData = z.infer<typeof wallSchema>;
 const WallEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [logoPreview, setLogoPreview] = useState("");
@@ -64,33 +62,25 @@ const WallEdit = () => {
     }
   });
 
+  // React Query hooks
+  const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
+  const { data: wall, isLoading: wallLoading } = useWall(id!);
+  const updateWallMutation = useUpdateWall();
+
+  const user = currentUserData?.user;
+  const loading = userLoading || wallLoading;
+
   useEffect(() => {
-    const loadWall = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setUser(session.user);
+    const hasToken = !!localStorage.getItem('token');
+    if (hasToken && !userLoading && !currentUserData) {
+      navigate("/auth");
+    } else if (!hasToken) {
+      navigate("/auth");
+    }
+  }, [userLoading, currentUserData, navigate]);
 
-      const { data: wall, error } = await supabase
-        .from("walls")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error || !wall) {
-        toast.error("Wall not found");
-        navigate("/dashboard");
-        return;
-      }
-
-      if (wall.user_id !== session.user.id) {
-        toast.error("You don't have permission to edit this wall");
-        navigate("/dashboard");
-        return;
-      }
-
+  useEffect(() => {
+    if (wall) {
       // Populate form
       form.reset({
         title: wall.title,
@@ -115,11 +105,8 @@ const WallEdit = () => {
       }
       
       setAwards(wall.awards || []);
-      setLoading(false);
-    };
-
-    loadWall();
-  }, [id, navigate]);
+    }
+  }, [wall, form]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -222,12 +209,7 @@ const WallEdit = () => {
         updateData.published = published;
       }
 
-      const { error: wallError } = await supabase
-        .from("walls")
-        .update(updateData)
-        .eq("id", id);
-
-      if (wallError) throw wallError;
+      await updateWallMutation.mutateAsync({ id: id!, data: updateData });
 
       toast.success("Wall updated successfully!");
       navigate(`/wall/${id}`);

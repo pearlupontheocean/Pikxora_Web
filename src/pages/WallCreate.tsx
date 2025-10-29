@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser, useCreateWall } from "@/lib/api-hooks";
 import { uploadFile } from "@/lib/upload";
 import { toast } from "sonner";
 import { Loader2, Upload, Plus, X } from "lucide-react";
@@ -31,8 +31,7 @@ type WallFormData = z.infer<typeof wallSchema>;
 
 const WallCreate = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [logoPreview, setLogoPreview] = useState("");
@@ -63,19 +62,22 @@ const WallCreate = () => {
     }
   });
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        navigate("/auth");
-        return;
-      }
-      setUser(session.user);
-      setLoading(false);
-    };
+  // React Query hooks
+  const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
+  const createWallMutation = useCreateWall();
 
-    checkUser();
-  }, [navigate]);
+  const user = currentUserData?.user;
+
+  useEffect(() => {
+    const hasToken = !!localStorage.getItem('token');
+    if (!userLoading && !currentUserData && hasToken) {
+      // Token exists but user data not loaded - might be invalid
+      navigate("/auth");
+    } else if (!hasToken && !userLoading) {
+      // No token and not loading - not logged in
+      navigate("/auth");
+    }
+  }, [userLoading, currentUserData, navigate]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -160,26 +162,21 @@ const WallCreate = () => {
         showreelUrl = url || "";
       }
 
-      const { error: wallError } = await supabase
-        .from("walls")
-        .insert({
-          user_id: user.id,
-          title: data.title,
-          description: data.description,
-          tagline: data.tagline,
-          logo_url: logoUrl,
-          hero_media_url: heroUrl,
-          hero_media_type: "image",
-          showreel_url: showreelUrl,
-          showreel_type: data.showreel_type,
-          journey_content: data.journey_content,
-          brand_colors: brandColors,
-          social_links: socialLinks,
-          awards: awards.length > 0 ? awards : null,
-          published
-        });
-
-      if (wallError) throw wallError;
+      await createWallMutation.mutateAsync({
+        title: data.title,
+        description: data.description,
+        tagline: data.tagline,
+        logo_url: logoUrl,
+        hero_media_url: heroUrl,
+        hero_media_type: "image",
+        showreel_url: showreelUrl,
+        showreel_type: data.showreel_type,
+        journey_content: data.journey_content,
+        brand_colors: brandColors,
+        social_links: socialLinks,
+        awards: awards.length > 0 ? awards : null,
+        published
+      });
 
       toast.success(published ? "Wall published successfully!" : "Wall saved as draft!");
       navigate("/dashboard");
@@ -190,7 +187,7 @@ const WallCreate = () => {
     }
   };
 
-  if (loading) {
+  if (userLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

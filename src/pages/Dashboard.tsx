@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getCurrentUser, supabase } from "@/lib/supabase";
-import { getUserPrimaryRole } from "@/lib/roles";
+import { useCurrentUser, useMyProfile, useMyWalls } from "@/lib/api-hooks";
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,49 +9,22 @@ import { Loader2, Plus, Eye, Settings } from "lucide-react";
 import RatingStars from "@/components/RatingStars";
 
 const Dashboard = () => {
-  const [user, setUser] = useState<any>(null);
-  const [profile, setProfile] = useState<any>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [walls, setWalls] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  
+  // React Query hooks
+  const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
+  const { data: profile, isLoading: profileLoading } = useMyProfile();
+  const { data: walls = [], isLoading: wallsLoading } = useMyWalls();
+
+  const user = currentUserData?.user;
+  const loading = userLoading || profileLoading || wallsLoading;
 
   useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    const { session } = await getCurrentUser();
-    if (!session) {
+    const hasToken = !!localStorage.getItem('token');
+    if (!userLoading && !currentUserData && !hasToken) {
       navigate("/auth");
-      return;
     }
-
-    setUser(session.user);
-
-    // Load profile
-    const { data: profileData } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", session.user.id)
-      .single();
-
-    setProfile(profileData);
-
-    // Load user role
-    const role = await getUserPrimaryRole(session.user.id);
-    setUserRole(role);
-
-    // Load walls
-    const { data: wallsData } = await supabase
-      .from("walls")
-      .select("*")
-      .eq("user_id", session.user.id)
-      .order("created_at", { ascending: false });
-
-    setWalls(wallsData || []);
-    setLoading(false);
-  };
+  }, [userLoading, currentUserData, navigate]);
 
   if (loading) {
     return (
@@ -82,7 +54,7 @@ const Dashboard = () => {
                 Welcome, {profile?.name}
               </h1>
               <p className="text-muted-foreground">
-                Role: <span className="text-primary capitalize">{userRole}</span>
+                Email: <span className="text-primary">{profile?.email}</span>
               </p>
               {profile?.rating && (
                 <div className="mt-2">
@@ -97,15 +69,15 @@ const Dashboard = () => {
           </div>
 
           {/* Verification Status */}
-          {userRole === "studio" && (isPending || isRejected) && (
+          {(isPending || isRejected) && (
             <Card className={`p-6 border-2 ${isRejected ? 'border-destructive' : 'border-yellow-500'}`}>
               <h3 className="font-semibold text-lg mb-2">
                 {isPending ? "Verification Pending" : "Verification Rejected"}
               </h3>
               <p className="text-muted-foreground">
                 {isPending
-                  ? "Your studio account is awaiting admin verification. You'll be able to create walls once approved."
-                  : "Your studio verification was rejected. Please contact support for more information."}
+                  ? "Your account is awaiting admin verification. You'll be able to create walls once approved."
+                  : "Your verification was rejected. Please contact support for more information."}
               </p>
             </Card>
           )}
@@ -114,7 +86,7 @@ const Dashboard = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold">Your Walls</h2>
-              {userRole !== "investor" && profile?.verification_status === "approved" && (
+              {profile?.verification_status === "approved" && (
                 <Button onClick={() => navigate("/wall/create")}>
                   <Plus className="h-4 w-4 mr-2" />
                   Create Wall
@@ -127,7 +99,7 @@ const Dashboard = () => {
                 <p className="text-muted-foreground mb-4">
                   You haven't created any walls yet
                 </p>
-                {profile?.verification_status === "approved" && userRole !== "investor" && (
+                {profile?.verification_status === "approved" && (
                   <Button onClick={() => navigate("/wall/create")}>
                     Create Your First Wall
                   </Button>
@@ -136,12 +108,12 @@ const Dashboard = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {walls.map((wall) => (
-                  <motion.div
-                    key={wall.id}
-                    whileHover={{ scale: 1.02 }}
-                    className="hover-lift"
-                  >
-                    <Card className="p-6 border-red-glow cursor-pointer" onClick={() => navigate(`/wall/${wall.id}`)}>
+                      <motion.div
+                        key={wall._id}
+                        whileHover={{ scale: 1.02 }}
+                        className="hover-lift"
+                      >
+                        <Card className="p-6 border-red-glow cursor-pointer" onClick={() => navigate(`/wall/${wall._id}`)}>
                       <div className="flex items-start justify-between mb-4">
                         <h3 className="font-bold text-lg">{wall.title}</h3>
                         <span className={`text-xs px-2 py-1 rounded ${wall.published ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
@@ -162,15 +134,20 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Admin Section */}
-          {userRole === "admin" && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
-              <Button onClick={() => navigate("/admin/verifications")}>
-                View Pending Verifications
-              </Button>
-            </div>
-          )}
+              {/* Admin Section */}
+              {user?.roles?.includes('admin') && (
+                <div>
+                  <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
+                  <div className="flex gap-4">
+                    <Button onClick={() => navigate("/admin/verifications")} size="lg">
+                      Approve Studios
+                    </Button>
+                    <Button onClick={() => navigate("/admin/verifications")} variant="outline" size="lg">
+                      Manage All Users
+                    </Button>
+                  </div>
+                </div>
+              )}
         </motion.div>
       </div>
     </div>

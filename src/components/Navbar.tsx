@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { motion } from "framer-motion";
 import { LogOut, User, LayoutGrid, LogIn, UserPlus } from "lucide-react";
-import { signOut } from "@/lib/supabase";
+import { useSignOut } from "@/lib/api-hooks";
 import { toast } from "sonner";
 
 interface NavbarProps {
@@ -12,14 +12,15 @@ interface NavbarProps {
 
 const Navbar = ({ user, profile }: NavbarProps) => {
   const navigate = useNavigate();
+  const signOutMutation = useSignOut();
 
   const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast.error("Error signing out");
-    } else {
+    try {
+      await signOutMutation.mutateAsync();
       toast.success("Signed out successfully");
       navigate("/auth");
+    } catch (error) {
+      toast.error("Error signing out");
     }
   };
 

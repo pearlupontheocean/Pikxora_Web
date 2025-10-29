@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DemoCredentials } from "@/components/DemoCredentials";
-import { signUp, signIn, getCurrentUser, supabase } from "@/lib/supabase";
+import { useCurrentUser, useSignUp, useSignIn } from "@/lib/api-hooks";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -24,97 +24,57 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState("studio");
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // React Query hooks - disable if no token to prevent re-render loops
+  const hasToken = !!localStorage.getItem('token');
+  const { data: currentUser, isLoading: userLoading } = useCurrentUser();
+  const signUpMutation = useSignUp();
+  const signInMutation = useSignIn();
+
+  const loading = signUpMutation.isPending || signInMutation.isPending;
+
   useEffect(() => {
-    // Check if user is already logged in
-    getCurrentUser().then(({ session }) => {
-      if (session) {
-        navigate("/dashboard");
-      }
-    });
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && event === "SIGNED_IN") {
-        navigate("/dashboard");
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    // Only navigate if we have a current user and not loading
+    if (!userLoading && currentUser && hasToken) {
+      navigate("/dashboard");
+    }
+  }, [currentUser, userLoading, hasToken, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
       if (isSignUp) {
         // Validate signup data
         const validatedData = signupSchema.parse({ email, password, name, role });
         
-        const { data, error, role: userRole } = await signUp(
-          validatedData.email,
-          validatedData.password,
-          validatedData.name,
-          validatedData.role
-        );
+        const result = await signUpMutation.mutateAsync({
+          email: validatedData.email,
+          password: validatedData.password,
+          name: validatedData.name,
+          role: validatedData.role,
+        });
 
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast.error("This email is already registered. Please sign in instead.");
-          } else {
-            toast.error(error.message);
-          }
-        } else if (data.user) {
-          // Create profile
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .insert({
-              id: data.user.id,
-              email: validatedData.email,
-              name: validatedData.name,
-              verification_status: userRole === "studio" ? "pending" : "approved",
-            });
-
-          if (profileError) {
-            toast.error("Error creating profile");
-            return;
-          }
-
-          // Create user role
-          const { error: roleError } = await supabase
-            .from("user_roles")
-            .insert({
-              user_id: data.user.id,
-              role: userRole as any,
-            });
-
-          if (roleError) {
-            toast.error("Error setting user role");
-          } else {
-            toast.success("Account created! Welcome to PIKXORA");
-            navigate("/dashboard");
-          }
+        if (result) {
+          toast.success("Account created! Welcome to PIKXORA");
+          navigate("/dashboard");
         }
       } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast.error(error.message);
-        } else {
+        const result = await signInMutation.mutateAsync({ email, password });
+        
+        if (result) {
           toast.success("Welcome back!");
           navigate("/dashboard");
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
-        toast.error("An error occurred");
+        const errorMessage = error?.response?.data?.error || error?.message || "An error occurred";
+        toast.error(errorMessage);
       }
-    } finally {
-      setLoading(false);
     }
   };
 
