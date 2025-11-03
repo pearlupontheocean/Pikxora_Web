@@ -30,11 +30,11 @@ const Index = () => {
       {/* Hero Section - Full Immersive */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <img
+          {/* <img
             src={heroGlobe}
             alt="Holographic globe with India glowing at center"
             className="w-full h-full object-cover"
-          />
+          /> */}
           <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background" />
         </div>
 
@@ -61,7 +61,15 @@ const Index = () => {
               animate={{ scale: 1 }}
               transition={{ duration: 0.5, delay: 0.3 }}
             >
-              <span className="red-glow-intense block mb-4">PIKXORA</span>
+              <div className="flex justify-center mb-4">
+                <div className="text-vertical-outline-red text-7xl md:text-7xl lg:text-8xl">
+                  {'PIKXORA'.split('').map((letter, index) => (
+                    <span key={index} className="letter block">
+                      {letter}
+                    </span>
+                  ))}
+                </div>
+              </div>
               <span className="text-3xl md:text-4xl lg:text-5xl font-normal text-foreground/90 block leading-relaxed">
                 Where Indian Pixels Power Global Dreams
               </span>

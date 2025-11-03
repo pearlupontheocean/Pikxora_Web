@@ -25,8 +25,9 @@ app.use(cors({
   origin: '*', // Allow all origins (use specific origin in production)
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increase payload size limit to handle base64 images (50MB file = ~67MB in base64)
+app.use(express.json({ limit: '70mb' }));
+app.use(express.urlencoded({ extended: true, limit: '70mb' }));
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));

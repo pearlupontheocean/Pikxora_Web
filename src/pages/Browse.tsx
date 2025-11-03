@@ -38,6 +38,9 @@ const Browse = () => {
     return ratingB - ratingA;
   });
 
+  console.log("Sorted Walls",sortedWalls);
+  
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

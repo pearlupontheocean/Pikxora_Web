@@ -83,9 +83,21 @@ const WallCreate = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (50MB max)
+    const maxSizeMB = 50;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      toast.error(`Logo image is too large. Maximum file size is ${maxSizeMB}MB. Current file: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setLogoPreview(reader.result as string);
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read logo image file');
     };
     reader.readAsDataURL(file);
   };
@@ -94,9 +106,21 @@ const WallCreate = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file size (50MB max)
+    const maxSizeMB = 50;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      toast.error(`Hero image is too large. Maximum file size is ${maxSizeMB}MB. Current file: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+      e.target.value = ''; // Clear the input
+      return;
+    }
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setHeroPreview(reader.result as string);
+    };
+    reader.onerror = () => {
+      toast.error('Failed to read hero image file');
     };
     reader.readAsDataURL(file);
   };
@@ -124,50 +148,52 @@ const WallCreate = () => {
 
     setSubmitting(true);
     try {
-      let logoUrl = logoPreview;
-      let heroUrl = heroPreview;
+      // Use base64 directly from preview - no file upload needed
+      // Backend will store base64 URLs directly in the database
+      let logoUrl = logoPreview || "";
+      let heroUrl = heroPreview || "";
       let showreelUrl = data.showreel_url;
 
-      // Upload logo if it's a local file
-      if (logoPreview && logoPreview.startsWith("data:")) {
-        const logoInput = document.querySelector('input[name="logo"]') as HTMLInputElement;
-        const logoFile = logoInput?.files?.[0];
-        if (logoFile) {
-          const { url, error } = await uploadFile(logoFile, "wall-assets", "logos");
-          if (error) throw error;
-          logoUrl = url || "";
-        }
-      }
-
-      // Upload hero image if it's a local file
-      if (heroPreview && heroPreview.startsWith("data:")) {
-        const heroInput = document.querySelector('input[name="hero"]') as HTMLInputElement;
-        const heroFile = heroInput?.files?.[0];
-        if (heroFile) {
-          const { url, error } = await uploadFile(heroFile, "wall-assets", "hero");
-          if (error) throw error;
-          heroUrl = url || "";
-        }
-      }
-
-      // Upload showreel video if selected
+      // Convert showreel video to base64 if it's a local upload
       if (showreelFile && data.showreel_type === "upload") {
-        const { url, error } = await uploadFile(
-          showreelFile,
-          "wall-assets",
-          "showreels",
-          (progress) => setUploadProgress(progress.progress)
-        );
-        if (error) throw error;
-        showreelUrl = url || "";
+        // Validate file size (50MB max)
+        const maxSizeMB = 50;
+        const maxSizeBytes = maxSizeMB * 1024 * 1024;
+        if (showreelFile.size > maxSizeBytes) {
+          toast.error(`Showreel video is too large. Maximum file size is ${maxSizeMB}MB. Current file: ${(showreelFile.size / (1024 * 1024)).toFixed(2)}MB`);
+          setSubmitting(false);
+          return;
+        }
+
+        // Convert video file to base64
+        const reader = new FileReader();
+        try {
+          showreelUrl = await new Promise<string>((resolve, reject) => {
+            reader.onloadend = () => {
+              if (reader.result) {
+                resolve(reader.result as string);
+              } else {
+                reject(new Error('Failed to read video file'));
+              }
+            };
+            reader.onerror = () => {
+              reject(new Error('Failed to read video file'));
+            };
+            reader.readAsDataURL(showreelFile);
+          });
+        } catch (error: any) {
+          toast.error(error.message || 'Failed to convert video to base64');
+          setSubmitting(false);
+          return;
+        }
       }
 
       await createWallMutation.mutateAsync({
         title: data.title,
         description: data.description,
         tagline: data.tagline,
-        logo_url: logoUrl,
-        hero_media_url: heroUrl,
+        logo_url: logoUrl, // Send base64 data URL directly
+        hero_media_url: heroUrl, // Send base64 data URL directly
         hero_media_type: "image",
         showreel_url: showreelUrl,
         showreel_type: data.showreel_type,

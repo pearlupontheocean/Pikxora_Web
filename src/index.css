@@ -105,4 +105,29 @@ All colors MUST be HSL.
     border: 1px solid hsl(var(--red-glow));
     box-shadow: var(--shadow-red);
   }
+
+  /* Vertical text with red outline effect - matching AGENDA style */
+  .text-vertical-outline-red {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-family: 'Arial Black', 'Helvetica Neue', 'Impact', system-ui, sans-serif;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+  }
+
+  .text-vertical-outline-red .letter {
+    line-height: 0.9;
+    margin: 0;
+    display: block;
+    color: hsl(0 0% 0%);
+    -webkit-text-stroke: 3px hsl(var(--red-glow));
+    -webkit-text-fill-color: hsl(0 0% 0%);
+    /* text-shadow: 
+      0 0 10px hsl(var(--red-glow) / 1),
+      0 0 20px hsl(var(--red-glow) / 0.8),
+      0 0 30px hsl(var(--red-glow) / 0.6),
+      0 0 40px hsl(var(--red-glow) / 0.4);
+    filter: drop-shadow(0 0 8px hsl(var(--red-glow) / 0.9)); */
+  }
 }

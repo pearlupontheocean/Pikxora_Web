@@ -10,17 +10,19 @@ import RatingStars from "@/components/RatingStars";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  
+
   // React Query hooks
   const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
   const { data: profile, isLoading: profileLoading } = useMyProfile();
   const { data: walls = [], isLoading: wallsLoading } = useMyWalls();
 
+  console.log("Walls",walls);
+  
   const user = currentUserData?.user;
   const loading = userLoading || profileLoading || wallsLoading;
 
   useEffect(() => {
-    const hasToken = !!localStorage.getItem('token');
+    const hasToken = !!localStorage.getItem("token");
     if (!userLoading && !currentUserData && !hasToken) {
       navigate("/auth");
     }
@@ -40,7 +42,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen">
       <Navbar user={user} profile={profile} />
-      
+
       <div className="container mx-auto px-4 pt-24 pb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -70,7 +72,11 @@ const Dashboard = () => {
 
           {/* Verification Status */}
           {(isPending || isRejected) && (
-            <Card className={`p-6 border-2 ${isRejected ? 'border-destructive' : 'border-yellow-500'}`}>
+            <Card
+              className={`p-6 border-2 ${
+                isRejected ? "border-destructive" : "border-yellow-500"
+              }`}
+            >
               <h3 className="font-semibold text-lg mb-2">
                 {isPending ? "Verification Pending" : "Verification Rejected"}
               </h3>
@@ -108,15 +114,24 @@ const Dashboard = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {walls.map((wall) => (
-                      <motion.div
-                        key={wall._id}
-                        whileHover={{ scale: 1.02 }}
-                        className="hover-lift"
-                      >
-                        <Card className="p-6 border-red-glow cursor-pointer" onClick={() => navigate(`/wall/${wall._id}`)}>
+                  <motion.div
+                    key={wall._id}
+                    whileHover={{ scale: 1.02 }}
+                    className="hover-lift"
+                  >
+                    <Card
+                      className="p-6 border-red-glow cursor-pointer"
+                      onClick={() => navigate(`/wall/${wall._id}`)}
+                    >
                       <div className="flex items-start justify-between mb-4">
                         <h3 className="font-bold text-lg">{wall.title}</h3>
-                        <span className={`text-xs px-2 py-1 rounded ${wall.published ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            wall.published
+                              ? "bg-green-500/20 text-green-400"
+                              : "bg-yellow-500/20 text-yellow-400"
+                          }`}
+                        >
                           {wall.published ? "Published" : "Draft"}
                         </span>
                       </div>
@@ -134,20 +149,27 @@ const Dashboard = () => {
             )}
           </div>
 
-              {/* Admin Section */}
-              {user?.roles?.includes('admin') && (
-                <div>
-                  <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
-                  <div className="flex gap-4">
-                    <Button onClick={() => navigate("/admin/verifications")} size="lg">
-                      Approve Studios
-                    </Button>
-                    <Button onClick={() => navigate("/admin/verifications")} variant="outline" size="lg">
-                      Manage All Users
-                    </Button>
-                  </div>
-                </div>
-              )}
+          {/* Admin Section */}
+          {user?.roles?.includes("admin") && (
+            <div>
+              <h2 className="text-2xl font-bold mb-6">Admin Panel</h2>
+              <div className="flex gap-4">
+                <Button
+                  onClick={() => navigate("/admin/verifications")}
+                  size="lg"
+                >
+                  Approve Studios
+                </Button>
+                <Button
+                  onClick={() => navigate("/admin/verifications")}
+                  variant="outline"
+                  size="lg"
+                >
+                  Manage All Users
+                </Button>
+              </div>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
