@@ -25,6 +25,17 @@ const AdminVerifications = () => {
   const user = currentUserData?.user;
   const loading = loadingPending || loadingApproved;
 
+  // Debug: Log approved users to see if rating is included
+  useEffect(() => {
+    if (approvedUsers.length > 0) {
+      console.log("Approved users with ratings:", approvedUsers.map((u: any) => ({
+        name: u.name,
+        rating: u.rating,
+        verification_status: u.verification_status
+      })));
+    }
+  }, [approvedUsers]);
+
   useEffect(() => {
     const hasToken = !!localStorage.getItem('token');
     if (hasToken && !loading && !currentUserData) {
@@ -229,8 +240,10 @@ const AdminVerifications = () => {
                               <span className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-semibold">
                                 Approved
                               </span>
-                              {approvedUser.rating && (
+                              {approvedUser.rating ? (
                                 <RatingStars rating={approvedUser.rating} showBadge />
+                              ) : (
+                                <span className="text-xs text-muted-foreground">No rating</span>
                               )}
                             </div>
                           </div>
@@ -269,12 +282,31 @@ const AdminVerifications = () => {
 
                         <div className="space-y-4">
                           <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                            <p className="text-sm text-muted-foreground mb-2">
-                              Rating: {approvedUser.rating ? `${approvedUser.rating} stars` : 'Not rated'}
-                            </p>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-semibold">Rating:</span>
+                              {approvedUser.rating ? (
+                                <div className="flex items-center gap-2">
+                                  <RatingStars rating={approvedUser.rating} showBadge={false} />
+                                  <span className="text-sm text-foreground font-bold">
+                                    {approvedUser.rating}/5
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-sm text-muted-foreground">Not rated</span>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground">
                               Status: {approvedUser.verification_status}
                             </p>
+                            {approvedUser.rating && (
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {approvedUser.rating === 5 && "Global Elite Studio"}
+                                {approvedUser.rating === 4 && "Premier Studio"}
+                                {approvedUser.rating === 3 && "Verified Studio"}
+                                {approvedUser.rating === 2 && "Approved Studio"}
+                                {approvedUser.rating === 1 && "Entry Level Studio"}
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>

@@ -79,6 +79,10 @@ All colors MUST be HSL.
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   /* Custom utility classes */
   .red-glow {
     text-shadow: 0 0 10px hsl(var(--red-glow) / 0.8);
@@ -129,5 +133,23 @@ All colors MUST be HSL.
       0 0 30px hsl(var(--red-glow) / 0.6),
       0 0 40px hsl(var(--red-glow) / 0.4);
     filter: drop-shadow(0 0 8px hsl(var(--red-glow) / 0.9)); */
+  }
+
+  /* VFX Card Enhancements */
+  .vfx-card {
+    will-change: transform, opacity;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+
+  /* Smooth glassmorphism */
+  .glass-vfx {
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+  }
+
+  /* Performance optimization for animations */
+  .vfx-glow {
+    will-change: opacity, transform;
   }
 }

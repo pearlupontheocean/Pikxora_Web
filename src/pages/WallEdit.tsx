@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 
@@ -519,7 +519,8 @@ const WallEdit = () => {
                     name="journey_content"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Your Story</FormLabel>
+                        <FormLabel>Your Story </FormLabel>
+                        <FormDescription>Example (2020: Founded VFX Studios with a vision to revolutionize visual effects)</FormDescription>
                         <FormControl>
                           <Textarea
                             placeholder="Tell your studio's story, milestones, and journey..."
@@ -543,6 +544,29 @@ const WallEdit = () => {
                   disabled={submitting}
                 >
                   Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
+                  disabled={submitting}
+                >
+                  Save as Draft
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => form.handleSubmit((data) => onSubmit(data, true))()}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Publishing...
+                    </>
+                  ) : (
+                    "Publish & Update"
+                  )}
                 </Button>
                 <Button
                   type="button"

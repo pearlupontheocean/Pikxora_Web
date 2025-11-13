@@ -239,6 +239,36 @@ export const useApprovedProfiles = () => {
   });
 };
 
+// Project hooks
+export const useCreateProject = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: any) => {
+      const response = await axiosInstance.post('/projects', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      // Invalidate projects query - will need to refetch manually
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+};
+
+export const useUpdateProject = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await axiosInstance.put(`/projects/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+};
+
 // Export getProjects for WallView
 export const getProjects = async (wallId: string) => {
   try {
@@ -247,4 +277,91 @@ export const getProjects = async (wallId: string) => {
   } catch (error) {
     return [];
   }
+};
+
+// Team Member Hooks
+export const useTeamMembers = (wallId: string) => {
+  return useQuery({
+    queryKey: ['teamMembers', wallId],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/team/wall/${wallId}`);
+      return response.data;
+    },
+    enabled: !!wallId,
+  });
+};
+
+export const useCreateTeamMember = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: {
+      wall_id: string;
+      name: string;
+      role: string;
+      bio?: string;
+      email?: string;
+      experience_years?: number;
+      skills?: string[];
+      avatar_url?: string;
+      social_links?: {
+        linkedin?: string;
+        twitter?: string;
+        instagram?: string;
+        website?: string;
+        portfolio?: string;
+      };
+      order_index?: number;
+    }) => {
+      const response = await axiosInstance.post('/team', data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    },
+  });
+};
+
+export const useUpdateTeamMember = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: {
+      name?: string;
+      role?: string;
+      bio?: string;
+      email?: string;
+      experience_years?: number;
+      skills?: string[];
+      avatar_url?: string;
+      social_links?: {
+        linkedin?: string;
+        twitter?: string;
+        instagram?: string;
+        website?: string;
+        portfolio?: string;
+      };
+      order_index?: number;
+    } }) => {
+      const response = await axiosInstance.put(`/team/${id}`, data);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    },
+  });
+};
+
+export const useDeleteTeamMember = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosInstance.delete(`/team/${id}`);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    },
+  });
 };

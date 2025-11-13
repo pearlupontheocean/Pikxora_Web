@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.js';
 import profileRoutes from './routes/profiles.js';
 import wallRoutes from './routes/walls.js';
 import projectRoutes from './routes/projects.js';
+import teamRoutes from './routes/team.js';
 import uploadRoutes from './routes/upload.js';
 import dotenv from 'dotenv';
 
@@ -37,6 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profiles', profileRoutes);
 app.use('/api/walls', wallRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/team', teamRoutes);
 app.use('/api/upload', uploadRoutes);
 
 const PORT = process.env.PORT || 5001;

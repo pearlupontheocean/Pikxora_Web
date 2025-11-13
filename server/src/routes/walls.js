@@ -35,6 +35,14 @@ router.get('/my', protect, async (req, res) => {
       walls.map(async (wall) => {
         const wallObj = wall.toObject();
         
+        // Add rating directly from populated user_id (profile) for easier frontend access
+        if (wallObj.user_id && wallObj.user_id.rating) {
+          wallObj.rating = wallObj.user_id.rating;
+        } else if (profile.rating) {
+          // Fallback to profile rating if populate didn't work
+          wallObj.rating = profile.rating;
+        }
+        
         // Convert logo_url if it's a file path
         if (wallObj.logo_url && wallObj.logo_url.startsWith('/uploads/') && !isBase64Image(wallObj.logo_url)) {
           try {
@@ -101,6 +109,11 @@ router.get('/', async (req, res) => {
       walls.map(async (wall) => {
         const wallObj = wall.toObject();
         
+        // Add rating directly from populated user_id (profile) for easier frontend access
+        if (wallObj.user_id && wallObj.user_id.rating) {
+          wallObj.rating = wallObj.user_id.rating;
+        }
+        
         // Convert logo_url if it's a file path
         if (wallObj.logo_url && wallObj.logo_url.startsWith('/uploads/') && !isBase64Image(wallObj.logo_url)) {
           try {
@@ -145,6 +158,11 @@ router.get('/:id', async (req, res) => {
     }
     
     const wallObj = wall.toObject();
+    
+    // Add rating directly from populated user_id (profile) for easier frontend access
+    if (wallObj.user_id && wallObj.user_id.rating) {
+      wallObj.rating = wallObj.user_id.rating;
+    }
     
     // Convert file paths to base64 for frontend
     if (wallObj.logo_url && wallObj.logo_url.startsWith('/uploads/') && !isBase64Image(wallObj.logo_url)) {
@@ -299,6 +317,14 @@ router.post('/', protect, async (req, res) => {
     // Images should already be base64 at this point, but convert any remaining file paths as safety net
     const wallObj = populatedWall.toObject();
     
+    // Add rating directly from populated user_id (profile) for easier frontend access
+    if (wallObj.user_id && wallObj.user_id.rating) {
+      wallObj.rating = wallObj.user_id.rating;
+    } else if (profile.rating) {
+      // Fallback to profile rating if populate didn't work
+      wallObj.rating = profile.rating;
+    }
+    
     if (wallObj.logo_url && wallObj.logo_url.startsWith('/uploads/') && !isBase64Image(wallObj.logo_url)) {
       try {
         wallObj.logo_url = await convertFilePathToBase64(wallObj.logo_url);
@@ -430,6 +456,14 @@ router.put('/:id', protect, async (req, res) => {
       .populate('user_id', 'name email rating location associations');
     
     const wallObj = populatedWall.toObject();
+    
+    // Add rating directly from populated user_id (profile) for easier frontend access
+    if (wallObj.user_id && wallObj.user_id.rating) {
+      wallObj.rating = wallObj.user_id.rating;
+    } else if (profile.rating) {
+      // Fallback to profile rating if populate didn't work
+      wallObj.rating = profile.rating;
+    }
     
     // Convert any remaining file paths to base64 for frontend
     if (wallObj.logo_url && wallObj.logo_url.startsWith('/uploads/') && !isBase64Image(wallObj.logo_url)) {
