@@ -31,7 +31,6 @@ type WallFormData = z.infer<typeof wallSchema>;
 
 const WallCreate = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [logoPreview, setLogoPreview] = useState("");
@@ -66,7 +65,7 @@ const WallCreate = () => {
   const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
   const createWallMutation = useCreateWall();
 
-  const user = currentUserData?.user;
+  const user = (currentUserData as { user?: unknown } | undefined)?.user;
 
   useEffect(() => {
     const hasToken = !!localStorage.getItem('token');
@@ -83,8 +82,8 @@ const WallCreate = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (50MB max)
-    const maxSizeMB = 50;
+    // Validate file size (10MB max for images)
+    const maxSizeMB = 10;
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       toast.error(`Logo image is too large. Maximum file size is ${maxSizeMB}MB. Current file: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
@@ -106,8 +105,8 @@ const WallCreate = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (50MB max)
-    const maxSizeMB = 50;
+    // Validate file size (10MB max for images)
+    const maxSizeMB = 10;
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       toast.error(`Hero image is too large. Maximum file size is ${maxSizeMB}MB. Current file: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
@@ -150,8 +149,8 @@ const WallCreate = () => {
     try {
       // Use base64 directly from preview - no file upload needed
       // Backend will store base64 URLs directly in the database
-      let logoUrl = logoPreview || "";
-      let heroUrl = heroPreview || "";
+      const logoUrl = logoPreview || "";
+      const heroUrl = heroPreview || "";
       let showreelUrl = data.showreel_url;
 
       // Convert showreel video to base64 if it's a local upload
@@ -181,33 +180,65 @@ const WallCreate = () => {
             };
             reader.readAsDataURL(showreelFile);
           });
-        } catch (error: any) {
-          toast.error(error.message || 'Failed to convert video to base64');
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Failed to convert video to base64';
+          toast.error(errorMessage);
           setSubmitting(false);
           return;
         }
       }
 
-      await createWallMutation.mutateAsync({
+      // Prepare payload - only include fields with values
+      const payload: Record<string, unknown> = {
         title: data.title,
-        description: data.description,
-        tagline: data.tagline,
-        logo_url: logoUrl, // Send base64 data URL directly
-        hero_media_url: heroUrl, // Send base64 data URL directly
-        hero_media_type: "image",
-        showreel_url: showreelUrl,
-        showreel_type: data.showreel_type,
-        journey_content: data.journey_content,
-        brand_colors: brandColors,
-        social_links: socialLinks,
-        awards: awards.length > 0 ? awards : null,
         published
+      };
+
+      // Only add optional fields if they have values
+      if (data.description?.trim()) payload.description = data.description.trim();
+      if (data.tagline?.trim()) payload.tagline = data.tagline.trim();
+      if (logoUrl && logoUrl.trim()) payload.logo_url = logoUrl;
+      if (heroUrl && heroUrl.trim()) {
+        payload.hero_media_url = heroUrl;
+        payload.hero_media_type = "image";
+      }
+      if (showreelUrl?.trim()) {
+        payload.showreel_url = showreelUrl.trim();
+        payload.showreel_type = data.showreel_type || "embed";
+      }
+      if (data.journey_content?.trim()) payload.journey_content = data.journey_content.trim();
+      if (Object.keys(brandColors).length > 0) payload.brand_colors = brandColors;
+      if (Object.values(socialLinks).some(link => link && link.trim())) payload.social_links = socialLinks;
+      if (awards.length > 0) payload.awards = awards;
+
+      console.log('Creating wall with payload:', {
+        ...payload,
+        logo_url: payload.logo_url && typeof payload.logo_url === 'string' ? `${payload.logo_url.substring(0, 50)}...` : 'empty',
+        hero_media_url: payload.hero_media_url && typeof payload.hero_media_url === 'string' ? `${payload.hero_media_url.substring(0, 50)}...` : 'empty',
+        showreel_url: payload.showreel_url && typeof payload.showreel_url === 'string' ? `${payload.showreel_url.substring(0, 50)}...` : 'empty'
       });
+
+      await createWallMutation.mutateAsync(payload);
 
       toast.success(published ? "Wall published successfully!" : "Wall saved as draft!");
       navigate("/dashboard");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create wall");
+    } catch (error: unknown) {
+      console.error('Error creating wall:', error);
+      
+      // Extract error message from response
+      let errorMessage = "Failed to create wall";
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: { error?: string; message?: string } } };
+        if (axiosError.response?.data?.error) {
+          errorMessage = axiosError.response.data.error;
+        } else if (axiosError.response?.data?.message) {
+          errorMessage = axiosError.response.data.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -278,6 +309,9 @@ const WallCreate = () => {
 
                   <div>
                     <Label htmlFor="hero">Hero Image</Label>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Maximum file size: 10MB. Supported formats: JPG, PNG, GIF, WebP
+                    </p>
                     <Input
                       id="hero"
                       name="hero"
@@ -301,6 +335,9 @@ const WallCreate = () => {
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="logo">Logo</Label>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Maximum file size: 10MB. Supported formats: JPG, PNG, GIF, WebP, SVG
+                    </p>
                     <Input
                       id="logo"
                       name="logo"
@@ -454,6 +491,9 @@ const WallCreate = () => {
                   {form.watch("showreel_type") === "upload" && (
                     <div>
                       <Label htmlFor="showreel">Upload Video</Label>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Maximum file size: 50MB. Supported formats: MP4, WebM, MOV, AVI
+                      </p>
                       <Input
                         id="showreel"
                         type="file"
@@ -463,7 +503,7 @@ const WallCreate = () => {
                       />
                       {showreelFile && (
                         <p className="text-sm text-muted-foreground mt-2">
-                          Selected: {showreelFile.name}
+                          Selected: {showreelFile.name} ({(showreelFile.size / (1024 * 1024)).toFixed(2)} MB)
                         </p>
                       )}
                       {uploadProgress > 0 && uploadProgress < 100 && (
@@ -518,7 +558,14 @@ const WallCreate = () => {
                   onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
                   disabled={submitting}
                 >
-                  Save as Draft
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save as Draft"
+                  )}
                 </Button>
                 <Button
                   type="button"

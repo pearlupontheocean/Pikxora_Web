@@ -55,7 +55,6 @@ const dropOldIndexes = async () => {
       if (indexKeys.includes('studio_wall_id') || indexKeys.includes('artist_id')) {
         try {
           await TeamMember.collection.dropIndex(index.name);
-          console.log(`Dropped old TeamMember index: ${index.name}`);
         } catch (err) {
           // Index might not exist, ignore
           if (err.code !== 27 && err.code !== 26) {

@@ -22,6 +22,9 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Add indexes for faster queries
+userSchema.index({ email: 1 }); // Already unique, but explicit index helps
+
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);

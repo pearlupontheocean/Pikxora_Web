@@ -67,7 +67,7 @@ const WallEdit = () => {
   const { data: wall, isLoading: wallLoading } = useWall(id!);
   const updateWallMutation = useUpdateWall();
 
-  const user = currentUserData?.user;
+  const user = (currentUserData as { user?: unknown } | undefined)?.user;
   const loading = userLoading || wallLoading;
 
   useEffect(() => {
@@ -78,6 +78,14 @@ const WallEdit = () => {
       navigate("/auth");
     }
   }, [userLoading, currentUserData, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (wall) {
@@ -551,7 +559,14 @@ const WallEdit = () => {
                   onClick={() => form.handleSubmit((data) => onSubmit(data, false))()}
                   disabled={submitting}
                 >
-                  Save as Draft
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    "Save as Draft"
+                  )}
                 </Button>
                 <Button
                   type="button"

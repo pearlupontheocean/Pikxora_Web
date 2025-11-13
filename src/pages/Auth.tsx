@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DemoCredentials } from "@/components/DemoCredentials";
 import { useCurrentUser, useSignUp, useSignIn } from "@/lib/api-hooks";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 import { z } from "zod";
 
 const signupSchema = z.object({
@@ -68,12 +69,16 @@ const Auth = () => {
           navigate("/dashboard");
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof z.ZodError) {
         toast.error(error.errors[0].message);
       } else {
-        const errorMessage = error?.response?.data?.error || error?.message || "An error occurred";
-        toast.error(errorMessage);
+        const errorMessage = error && typeof error === 'object' && 'response' in error
+          ? (error as { response?: { data?: { error?: string } } })?.response?.data?.error
+          : error instanceof Error
+          ? error.message
+          : "An error occurred";
+        toast.error(errorMessage || "An error occurred");
       }
     }
   };
@@ -166,7 +171,14 @@ const Auth = () => {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isSignUp ? "Creating Account..." : "Signing In..."}
+                  </>
+                ) : (
+                  isSignUp ? "Sign Up" : "Sign In"
+                )}
               </Button>
             </form>
 
