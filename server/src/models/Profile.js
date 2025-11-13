@@ -43,5 +43,10 @@ const profileSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Add indexes for faster queries
+profileSchema.index({ user_id: 1 }); // Already unique, but explicit index helps
+profileSchema.index({ verification_status: 1 }); // Index for pending/approved queries
+profileSchema.index({ email: 1 }); // Index for email lookups
+
 const Profile = mongoose.model('Profile', profileSchema);
 export default Profile;

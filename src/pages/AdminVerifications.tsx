@@ -22,7 +22,7 @@ const AdminVerifications = () => {
   const { data: approvedUsers = [], isLoading: loadingApproved } = useApprovedProfiles();
   const verifyMutation = useVerifyProfile();
 
-  const user = currentUserData?.user;
+  const user = (currentUserData as { user?: { roles?: string[] } } | undefined)?.user;
   const loading = loadingPending || loadingApproved;
 
   // Debug: Log approved users to see if rating is included
@@ -164,9 +164,10 @@ const AdminVerifications = () => {
                             // Clear the selection after approval
                             setSelectedRatings(prev => ({ ...prev, [pendingUser._id]: "" }));
                           }}
+                          disabled={verifyMutation.isPending}
                         >
-                          <SelectTrigger className="border-border">
-                            <SelectValue placeholder="Select rating and approve" />
+                          <SelectTrigger className="border-border" disabled={verifyMutation.isPending}>
+                            <SelectValue placeholder={verifyMutation.isPending ? "Processing..." : "Select rating and approve"} />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="5">
@@ -207,9 +208,19 @@ const AdminVerifications = () => {
                         variant="destructive"
                         className="w-full"
                         onClick={() => handleVerification(pendingUser._id, "rejected")}
+                        disabled={verifyMutation.isPending}
                       >
-                        <X className="h-4 w-4 mr-2" />
-                        Reject Application
+                        {verifyMutation.isPending ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <X className="h-4 w-4 mr-2" />
+                            Reject Application
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>

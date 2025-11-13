@@ -30,5 +30,9 @@ const projectSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Add indexes for faster queries
+projectSchema.index({ wall_id: 1, order_index: 1 }); // Compound index for wall projects sorted by order
+projectSchema.index({ wall_id: 1 }); // Index for finding projects by wall
+
 const Project = mongoose.model('Project', projectSchema);
 export default Project;

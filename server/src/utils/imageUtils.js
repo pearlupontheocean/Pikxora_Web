@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -70,6 +71,38 @@ export function isBase64Image(str) {
 }
 
 /**
+ * Cleans and normalizes a base64 data URI string
+ * @param {string} base64Data - Base64 encoded data with data URI prefix
+ * @returns {string} - Cleaned base64 data URI
+ */
+export function cleanBase64String(base64Data) {
+  try {
+    if (!base64Data || typeof base64Data !== 'string') {
+      return base64Data;
+    }
+    
+    // If it's a data URI, preserve the prefix
+    if (base64Data.includes(',')) {
+      const parts = base64Data.split(',');
+      if (parts.length >= 2) {
+        const prefix = parts[0];
+        const data = parts.slice(1).join(','); // In case there are commas in the data (shouldn't happen, but be safe)
+        // Clean the base64 data part (remove whitespace)
+        const cleanedData = data.trim().replace(/\s/g, '');
+        return `${prefix},${cleanedData}`;
+      }
+    }
+    
+    // If it's just base64 data, clean it
+    return base64Data.trim().replace(/\s/g, '');
+  } catch (error) {
+    console.error('Error cleaning base64 string:', error);
+    // Return original if cleaning fails
+    return base64Data;
+  }
+}
+
+/**
  * Validates base64 image size
  * @param {string} base64Data - Base64 encoded image data
  * @param {number} maxSizeMB - Maximum file size in MB (default: 50MB)
@@ -80,39 +113,55 @@ export function validateBase64ImageSize(base64Data, maxSizeMB = 50) {
     return { valid: false, error: 'No image data provided' };
   }
   
-  // Remove data URI prefix to get just the base64 string
-  const base64String = base64Data.includes(',') 
-    ? base64Data.split(',')[1] 
-    : base64Data;
-  
-  // Base64 encoding increases size by ~33%, so actual file size is smaller
-  // Calculate approximate file size: base64 string length * 3/4
-  const base64Length = base64String.length;
-  const approximateFileSizeBytes = (base64Length * 3) / 4;
-  const sizeMB = approximateFileSizeBytes / (1024 * 1024);
-  const maxSizeBytes = maxSizeMB * 1024 * 1024;
-  
-  // Check actual base64 payload size (this is what we send over the network)
-  const base64PayloadSizeMB = base64String.length / (1024 * 1024);
-  
-  if (approximateFileSizeBytes > maxSizeBytes) {
-    return {
-      valid: false,
-      error: `Image file size (${sizeMB.toFixed(2)}MB) exceeds maximum allowed size of ${maxSizeMB}MB`,
-      sizeMB
-    };
+  try {
+    // Remove data URI prefix to get just the base64 string
+    let base64String = base64Data.includes(',') 
+      ? base64Data.split(',')[1] 
+      : base64Data;
+    
+    // Trim whitespace and newlines that might cause issues
+    base64String = base64String.trim().replace(/\s/g, '');
+    
+    // Validate base64 format (basic check)
+    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64String)) {
+      return { valid: false, error: 'Invalid base64 format' };
+    }
+    
+    // Base64 encoding increases size by ~33%, so actual file size is smaller
+    // Calculate approximate file size: base64 string length * 3/4
+    // Account for padding characters (=)
+    const paddingCount = (base64String.match(/=/g) || []).length;
+    const base64Length = base64String.length;
+    const approximateFileSizeBytes = Math.floor((base64Length * 3) / 4) - paddingCount;
+    const sizeMB = approximateFileSizeBytes / (1024 * 1024);
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    
+    // Check actual base64 payload size (this is what we send over the network)
+    const base64PayloadSizeMB = base64String.length / (1024 * 1024);
+    
+    if (approximateFileSizeBytes > maxSizeBytes) {
+      return {
+        valid: false,
+        error: `Image file size (${sizeMB.toFixed(2)}MB) exceeds maximum allowed size of ${maxSizeMB}MB`,
+        sizeMB
+      };
+    }
+    
+    // Also check base64 payload size (should be ~33% larger than file size)
+    // Use a more generous limit for payload size (base64 is ~33% larger)
+    if (base64PayloadSizeMB > maxSizeMB * 1.4) {
+      return {
+        valid: false,
+        error: `Image payload size (${base64PayloadSizeMB.toFixed(2)}MB) is too large. Maximum allowed: ${(maxSizeMB * 1.4).toFixed(2)}MB`,
+        sizeMB: base64PayloadSizeMB
+      };
+    }
+    
+    return { valid: true, sizeMB };
+  } catch (error) {
+    console.error('Error validating base64 image size:', error);
+    return { valid: false, error: `Validation error: ${error.message}` };
   }
-  
-  // Also check base64 payload size (should be ~33% larger than file size)
-  if (base64PayloadSizeMB > maxSizeMB * 1.5) {
-    return {
-      valid: false,
-      error: `Image payload size (${base64PayloadSizeMB.toFixed(2)}MB) is too large. Maximum allowed: ${(maxSizeMB * 1.5).toFixed(2)}MB`,
-      sizeMB: base64PayloadSizeMB
-    };
-  }
-  
-  return { valid: true, sizeMB };
 }
 
 /**
@@ -124,13 +173,15 @@ export async function convertFilePathToBase64(filePath) {
   try {
     const fullPath = path.join(__dirname, '../../', filePath);
     
-    // Check if file exists
-    if (!fs.existsSync(fullPath)) {
+    // Check if file exists (async check)
+    try {
+      await fsPromises.access(fullPath);
+    } catch {
       throw new Error(`File not found: ${filePath}`);
     }
     
-    // Read file as buffer
-    const buffer = fs.readFileSync(fullPath);
+    // Read file as buffer (async)
+    const buffer = await fsPromises.readFile(fullPath);
     
     // Determine MIME type from file extension
     const ext = path.extname(filePath).toLowerCase();

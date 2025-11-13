@@ -17,7 +17,7 @@ const Dashboard = () => {
   const { data: currentUserData, isLoading: userLoading } = useCurrentUser();
   const { data: profile, isLoading: profileLoading } = useMyProfile();
   const { data: walls = [], isLoading: wallsLoading } = useMyWalls();
-  const { mutateAsync: updateWall } = useUpdateWall();
+  const { mutateAsync: updateWall, isPending: isUpdatingWall } = useUpdateWall();
 
   console.log("Walls", walls);
   console.log("Profile", profile);
@@ -147,6 +147,7 @@ const Dashboard = () => {
                         console.error("Failed to update publish status:", error);
                       }
                     }}
+                    isUpdating={isUpdatingWall}
                   />
                 ))}
               </div>
@@ -198,13 +199,15 @@ const WallCard = ({
   index, 
   profileRating, 
   onClick,
-  onPublishToggle
+  onPublishToggle,
+  isUpdating
 }: { 
   wall: Wall; 
   index: number; 
   profileRating?: number; 
   onClick: () => void;
   onPublishToggle?: (wallId: string, currentStatus: boolean) => void;
+  isUpdating?: boolean;
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -318,9 +321,15 @@ const WallCard = ({
                     e.stopPropagation();
                     onPublishToggle(wall._id, wall.published || false);
                   }}
+                  disabled={isUpdating}
                   title={wall.published ? "Click to unpublish" : "Click to publish"}
                 >
-                  {wall.published ? (
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Updating...
+                    </>
+                  ) : wall.published ? (
                     <>
                       <CheckCircle2 className="h-3 w-3 mr-1" />
                       Published

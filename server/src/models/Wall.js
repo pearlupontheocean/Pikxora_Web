@@ -47,6 +47,12 @@ const wallSchema = new mongoose.Schema({
   timestamps: true
 });
 
+// Add indexes for faster queries
+wallSchema.index({ user_id: 1 }); // Index for finding walls by user
+wallSchema.index({ published: 1, createdAt: -1 }); // Index for published walls sorted by date
+wallSchema.index({ user_id: 1, published: 1 }); // Compound index for user's published walls
+wallSchema.index({ view_count: -1 }); // Index for sorting by views
+
 // Add method to increment view count
 wallSchema.methods.incrementViewCount = function() {
   this.view_count += 1;
