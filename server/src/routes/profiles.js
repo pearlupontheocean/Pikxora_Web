@@ -10,6 +10,12 @@ const router = express.Router();
 router.get('/', protect, adminOnly, async (req, res) => {
   try {
     const profiles = await Profile.find({}).populate('user_id', 'email roles').sort({ createdAt: -1 });
+    // Log profiles with ratings for debugging
+    console.log('Profiles with ratings:', profiles.map(p => ({
+      name: p.name,
+      rating: p.rating,
+      verification_status: p.verification_status
+    })));
     res.json(profiles);
   } catch (error) {
     console.error('Get profiles error:', error);
@@ -103,6 +109,13 @@ router.put('/:id/verify', protect, adminOnly, async (req, res) => {
     if (!profile) {
       return res.status(404).json({ error: 'Profile not found' });
     }
+    
+    // Log the updated profile to verify rating is saved
+    console.log('Profile updated:', {
+      name: profile.name,
+      verification_status: profile.verification_status,
+      rating: profile.rating
+    });
     
     res.json(profile);
   } catch (error) {

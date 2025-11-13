@@ -82,4 +82,37 @@ router.put('/:id', protect, async (req, res) => {
   }
 });
 
+// @route   DELETE /api/projects/:id
+// @desc    Delete a project
+// @access  Private
+router.delete('/:id', protect, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user_id: req.user.id });
+    if (!profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+    
+    const project = await Project.findById(req.params.id);
+    if (!project) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
+    
+    // Check if user owns the wall
+    const wall = await Wall.findById(project.wall_id);
+    if (!wall) {
+      return res.status(404).json({ error: 'Wall not found' });
+    }
+    
+    if (wall.user_id.toString() !== profile._id.toString()) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
+    
+    await Project.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error('Delete project error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

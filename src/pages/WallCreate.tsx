@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 
@@ -486,6 +486,8 @@ const WallCreate = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Your Story</FormLabel>
+                        <FormDescription>Example (2020: Founded VFX Studios with a vision to revolutionize visual effects)</FormDescription>
+
                         <FormControl>
                           <Textarea
                             placeholder="Tell your studio's story, milestones, and journey..."
